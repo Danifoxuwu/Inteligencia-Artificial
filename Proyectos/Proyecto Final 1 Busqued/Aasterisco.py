@@ -3,9 +3,12 @@
 
 #Importamos la libreria de pygame
 import pygame
+#Importamos la libreria de fuentes
+pygame.font.init()
 
 # Configuraciones iniciales
-ANCHO_VENTANA = 800
+# Cambio del tamaño de ventana de 800x800 a 500x500
+ANCHO_VENTANA = 500
 VENTANA = pygame.display.set_mode((ANCHO_VENTANA, ANCHO_VENTANA))
 pygame.display.set_caption("Visualización de Nodos")
 
@@ -27,6 +30,8 @@ class Nodo:
         self.color = BLANCO
         self.ancho = ancho
         self.total_filas = total_filas
+        #Fuente usada y tamaño de la fuente para las coordenadas dentro de los cuadros dibujados
+        self.fuente =pygame.font.SysFont("Arial", 8)
 
     def get_pos(self):
         return self.fila, self.col
@@ -54,6 +59,14 @@ class Nodo:
 
     def dibujar(self, ventana):
         pygame.draw.rect(ventana, self.color, (self.x, self.y, self.ancho, self.ancho))
+        #Llamado a la funcion para dibujar los numeros en cada casilla
+        self.dibujar_numero(ventana)
+        
+    #Funcion para dibujar el numero dentro de las casillas
+    def dibujar_numero(self, ventana):
+        numero = self.fila * self.total_filas + self.col + 1
+        texto = self.fuente.render(str(numero), True, NEGRO)
+        ventana.blit(texto, (self.x + 5, self.y + 5))
 
 def crear_grid(filas, ancho):
     grid = []
