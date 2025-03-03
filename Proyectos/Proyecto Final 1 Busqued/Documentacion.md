@@ -1,5 +1,5 @@
 # Errores dentro del codigo y su ejecucion que eh encontrado 
-=============
+
 # Problema 1
  -Existe un problema en el que no existe un limite al dibujar las paredes al salir el curso de la ventana se genera un error que detiene la ejecucion 
    "Exception has occurred: IndexError
@@ -13,13 +13,13 @@ IndexError: list index out of range"
 
 
 # Problematicas a resolver 
-=============
+
 # Problema 1 
  - Resolver que no intente dibujar y se detenga la ejecucion del codigo
 
 
 # Soluciones del codigo para los problemas 
-=============
+
 # Solucion al problema 1
 - En este caso podemos decir que las coordenadas "fila" y "col" pueden ser mayores que el número de filas o columnas al dar click fuera de los bordes lo que ocaciona un crasheo, en este caso la solucion fue crear una validacion que verifica si las coordenadas están dentro del rango válido. 
 
@@ -31,7 +31,7 @@ def obtener_click_pos(pos, filas, ancho):
     fila = min(max(y // ancho_nodo, 0), filas - 1)
     col = min(max(x // ancho_nodo, 0), filas - 1)
     return fila, col
-    ```
+```
 
 
 
