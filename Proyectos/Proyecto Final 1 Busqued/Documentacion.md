@@ -15,7 +15,7 @@ IndexError: list index out of range"
 # Problematicas a resolver 
 
 ## Problema 1 
- - Resolver que no intente dibujar y se detenga la ejecucion del codigo
+ - Resolver que intente dibujar fuera de los limites y se detenga la ejecucion del codigo
 
 ## Problema 2
 
