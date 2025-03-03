@@ -84,11 +84,9 @@ def dibujar(ventana, grid, filas, ancho):
 def obtener_click_pos(pos, filas, ancho):
     ancho_nodo = ancho // filas
     y, x = pos
-    fila = y // ancho_nodo
-    col = x // ancho_nodo
-    # Si el nodo esta fuera de los limites regresa none (Esto evita que se crashee el programa)
-    if fila >= filas or col >= filas:
-        return None, None
+    # Fila y columna en la que se hizo click exeptuando los bordes
+    fila = min(max(y // ancho_nodo, 0), filas - 1)
+    col = min(max(x // ancho_nodo, 0), filas - 1)
     return fila, col
 
 def main(ventana, ancho):

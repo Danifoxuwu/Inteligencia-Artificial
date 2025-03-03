@@ -20,4 +20,18 @@ IndexError: list index out of range"
 
 # Soluciones del codigo para los problemas 
 =============
-# 
+# Solucion al problema 1
+- En este caso podemos decir que las coordenadas "fila" y "col" pueden ser mayores que el número de filas o columnas al dar click fuera de los bordes lo que ocaciona un crasheo, en este caso la solucion fue crear una validacion que verifica si las coordenadas están dentro del rango válido. 
+
+```Python 
+def obtener_click_pos(pos, filas, ancho):
+    ancho_nodo = ancho // filas
+    y, x = pos
+    # Fila y columna en la que se hizo click exeptuando los bordes
+    fila = min(max(y // ancho_nodo, 0), filas - 1)
+    col = min(max(x // ancho_nodo, 0), filas - 1)
+    return fila, col
+    ```
+
+
+
