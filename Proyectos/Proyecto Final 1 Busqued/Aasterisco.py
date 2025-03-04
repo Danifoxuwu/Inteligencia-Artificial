@@ -16,10 +16,13 @@ pygame.display.set_caption("Visualización de Nodos")
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
 GRIS = (128, 128, 128)
+GRIS_CLARO = (192, 192, 192)
 VERDE = (0, 255, 0)
 ROJO = (255, 0, 0)
 NARANJA = (255, 165, 0)
 PURPURA = (128, 0, 128)
+AMARILLO_NEON = (255, 255, 0)
+
 
 class Nodo:
     def __init__(self, fila, col, ancho, total_filas):
@@ -52,7 +55,7 @@ class Nodo:
         self.color = NARANJA
 
     def hacer_pared(self):
-        self.color = NEGRO
+        self.color = GRIS_CLARO
 
     def hacer_fin(self):
         self.color = PURPURA
@@ -61,12 +64,20 @@ class Nodo:
         pygame.draw.rect(ventana, self.color, (self.x, self.y, self.ancho, self.ancho))
         #Llamado a la funcion para dibujar los numeros en cada casilla
         self.dibujar_numero(ventana)
+        self.dibujar_coordenadas(ventana)
         
     #Funcion para dibujar el numero dentro de las casillas
     def dibujar_numero(self, ventana):
-        numero = self.fila * self.total_filas + self.col + 1
+        numero = self.col * self.total_filas + self.fila + 1
         texto = self.fuente.render(str(numero), True, NEGRO)
         ventana.blit(texto, (self.x + 5, self.y + 5))
+        
+    #Dibujar coordenadas
+    def dibujar_coordenadas(self, ventana):
+        coordenadas = f"({self.fila}, {self.col})"
+        texto = self.fuente.render(coordenadas, True, NEGRO)
+        ventana.blit(texto, (self.x + 5, self.y + 15))
+    
 
 def crear_grid(filas, ancho):
     grid = []
@@ -116,6 +127,15 @@ def main(ventana, ancho):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 corriendo = False
+                
+            #Funcion para reiniciar todo sin tener que borrar 1x1 usando ctrl+r
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    for fila in grid:
+                        for nodo in fila:
+                            nodo.restablecer()
+                    inicio = None
+                    fin = None
 
             if pygame.mouse.get_pressed()[0]:  # Click izquierdo
                 pos = pygame.mouse.get_pos()

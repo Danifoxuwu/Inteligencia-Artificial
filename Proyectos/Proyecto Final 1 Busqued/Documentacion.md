@@ -1,7 +1,7 @@
 # Cambios en el codigo base 
 - Se cambio el tamaño de la ventana de 800x800 a 500x500
 - Se agrego la posibilidad de poder ver en cada casilla el numero correspondiente a esa casilla 
-    * Para ello primero importamos las fuentes de pygame y hacemos una configuracion de fuente y tamaño que tendra: 
+- Se agrego la posibilidad de poder ver las coordenadas en cada casilla
 ```Python 
 #Inicio de las fuentes 
 pygame.font.init()
@@ -9,17 +9,38 @@ pygame.font.init()
 #Fuente usada y tamaño de la fuente para las coordenadas dentro de los cuadros dibujados
 self.fuente =pygame.font.SysFont("Arial", 8)
 
-def dibujar(self, ventana):
+    def dibujar(self, ventana):
         pygame.draw.rect(ventana, self.color, (self.x, self.y, self.ancho, self.ancho))
         #Llamado a la funcion para dibujar los numeros en cada casilla
         self.dibujar_numero(ventana)
+        self.dibujar_coordenadas(ventana)
         
     #Funcion para dibujar el numero dentro de las casillas
     def dibujar_numero(self, ventana):
-        numero = self.fila * self.total_filas + self.col + 1
+        numero = self.col * self.total_filas + self.fila + 1
         texto = self.fuente.render(str(numero), True, NEGRO)
         ventana.blit(texto, (self.x + 5, self.y + 5))
+        
+    #Dibujar coordenadas
+    def dibujar_coordenadas(self, ventana):
+        coordenadas = f"({self.fila}, {self.col})"
+        texto = self.fuente.render(coordenadas, True, NEGRO)
+        ventana.blit(texto, (self.x + 5, self.y + 15))
 ```
+
+- Se agrego la capacidad de borrar las paredes, punto de inicio y punto final usando la combinacion de teclas "ctrl+r", lo que facilita reiniciar todo sin tener que borrar uno por uno, esto se agrego dentro del bucle principal del codigo
+  
+```Python
+ #Funcion para reiniciar todo sin tener que borrar 1x1 usando ctrl+r
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    for fila in grid:
+                        for nodo in fila:
+                            nodo.restablecer()
+                    inicio = None
+                    fin = None
+```
+
 
 
 
