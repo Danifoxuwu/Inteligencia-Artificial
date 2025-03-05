@@ -33,3 +33,14 @@ Como los principales patrones a utilizar tendríamos que recordar como es que fu
 - Jugadas individuales del jugador, usando posiciones de juego para asegurar que se formen líneas de 5 fichas para ganar 
 - Líneas formadas por el jugador, sean verticales, horizontales o diagonales 
 - Conjuntos de fichas (3 fichas en línea, 4 fichas en línea) cercanos al patrón de 5 fichas en línea 
+
+#### Definir la función de activación es necesaria para este problema 
+
+ Softmax?
+
+#### Definir el número máximo de entradas
+
+El numero maximo de entradas lo podemos entender de manera facil, en este caso es 20x20, lo que nos daria el equivalente 
+
+
+# Bias es una neurona extra que te ghace convertir el valor 
