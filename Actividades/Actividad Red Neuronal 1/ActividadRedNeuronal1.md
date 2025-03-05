@@ -21,10 +21,10 @@ Primero, tenemos que recordar que esta red neuronal tiene como principales compo
 ![alt text](image-1.png)
 
 Adaptada al problema podemos decir lo siguiente:
-**Capas de entrada:** En este caso la capa de entrada seria el tablero de 20*20
-**Capas de Convolución:** Se pueden detectar en este caso los patrones de lineas dentro del tablero
-**Capas de Pooling:**  Para evitar el sobre ajuste se puede en este caso destacar lo mas importante (Como la cercania a una linea de 5 fichas)
-**Capas de Conexión Completa:** Tomar una decision basada en lo anterior, lo que permitira hacer una jugada
+- **Capas de entrada:** En este caso la capa de entrada seria el tablero de 20*20
+- **Capas de Convolución:** Se pueden detectar en este caso los patrones de lineas dentro del tablero
+- **Capas de Pooling:**  Para evitar el sobre ajuste se puede en este caso destacar lo mas importante (Como la cercania a una linea de 5 fichas)
+- **Capas de Conexión Completa:** Tomar una decision basada en lo anterior, lo que permitira hacer una jugada
 
 
 
