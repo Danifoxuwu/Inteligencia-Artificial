@@ -25,6 +25,11 @@ Adaptada al problema podemos decir lo siguiente:
 - **Capas de Convolución:** Se pueden detectar en este caso los patrones de lineas dentro del tablero
 - **Capas de Pooling:**  Para evitar el sobre ajuste se puede en este caso destacar lo mas importante (Como la cercania a una linea de 5 fichas)
 - **Capas de Conexión Completa:** Tomar una decision basada en lo anterior, lo que permitira hacer una jugada
+  
+#### Definir los patrones a utilizar 
 
+Como los principales patrones a utilizar tendríamos que recordar como es que funciona el juego de 5 en línea, en este caso son las jugadas propias, jugadas del oponente, cercanía a formar una línea sea vertical, horizontal o en diagonal, así también como los bloqueos que otros jugadores pueden hacer sobre nuestras líneas, con esto en consideración podemos definir los siguientes patrones.
 
-
+- Jugadas individuales del jugador, usando posiciones de juego para asegurar que se formen líneas de 5 fichas para ganar 
+- Líneas formadas por el jugador, sean verticales, horizontales o diagonales 
+- Conjuntos de fichas (3 fichas en línea, 4 fichas en línea) cercanos al patrón de 5 fichas en línea 
