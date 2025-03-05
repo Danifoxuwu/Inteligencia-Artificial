@@ -41,7 +41,36 @@ self.fuente =pygame.font.SysFont("Arial", 8)
                     fin = None
 ```
 
+- En este caso para la implementacion del algoritmo A* tomare encuenta los apuntes que nos dio el profesor, en donde viene el primer pseudocodigo de lo que tiene que hacer nuestro programa, para este caso tuvimos que analizar cada parte del pseudocodigo para llegar a las partes del codigo que tendriamos que agregar.
 
+El Algoritmo se basa en los siguientes pasos:
+
+Etapas del Algoritmo
+
+- Inicialización:
+Se parte de un nodo inicial (el punto de partida) y se agrega a una estructura de datos (generalmente una cola de prioridad).
+Cada nodo tiene un valor de f(n), calculado como la suma de g(n) y h(n) , donde g(n) es 0 para el nodo inicial y h(n) es el valor heurístico estimado.
+
+- Expansión de Nodos:
+En cada paso, el algoritmo extrae el nodo con el menor valor f(n) de la cola de prioridad. Luego, el algoritmo expande este nodo, es decir, explora todos sus nodos vecinos.
+Para cada vecino, se calcula el nuevo costo g(n) como la distancia acumulada desde el nodo inicial y se actualiza el valor de f(n)
+
+- Actualización de Nodos Vecinos:
+Si un vecino aún no ha sido explorado, o si se ha encontrado un camino más corto a dicho vecino, se actualizan sus valores de g(n) y f(n) , y se agrega a la cola de prioridad para ser evaluado más adelante.
+
+- Heurística:
+La heurística h(n) es crucial para guiar la búsqueda hacia el objetivo. Una buena heurística hace que A* sea más eficiente, ya que prioriza la expansión de los nodos más prometedores.
+Las heurísticas comunes incluyen la distancia Manhattan (para cuadrículas donde solo se puede mover en horizontal o vertical) y la distancia Euclidiana (para espacios donde se puede mover en diagonal).
+
+- Terminación:
+El algoritmo termina cuando se extrae el nodo objetivo (el nodo final) de la cola de prioridad, lo que significa que se ha encontrado el camino más corto.
+
+- Reconstrucción del Camino:
+Una vez que se ha encontrado el nodo final, el camino se reconstruye retrocediendo desde el nodo final al nodo inicial a través de los nodos predecesores.
+
+En este caso podemos ver que son pasos algo complejos pero podemos en este caso expresarlos en codigo sin problema, la siguiente parte podemos ver como se implemento este pseudocodigo en el codigo cascaron:
+
+## Aplicacion de pseudocodigo dentro del cascaron
 
 
 # Errores dentro del codigo y su ejecucion que eh encontrado 
