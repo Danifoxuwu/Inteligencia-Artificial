@@ -94,16 +94,28 @@ class Nodo:
         ventana.blit(texto, (self.x + 5, self.y + 15))
     
     #Agregar los vecinos al hacer el calculo 
-    def actualizar_vecinos(self,grid):
+    #Separados por los movimientos que se pueden hacer
+    def actualizar_vecinos(self, grid):
         self.vecinos = []
+        # Movimientos verticales y horizontales
         if self.fila < self.total_filas - 1 and not grid[self.fila + 1][self.col].es_pared():  # Abajo
-            self.vecinos.append(grid[self.fila + 1][self.col])
+            self.vecinos.append((grid[self.fila + 1][self.col], 10))
         if self.fila > 0 and not grid[self.fila - 1][self.col].es_pared():  # Arriba
-            self.vecinos.append(grid[self.fila - 1][self.col])
+            self.vecinos.append((grid[self.fila - 1][self.col], 10))
         if self.col < self.total_filas - 1 and not grid[self.fila][self.col + 1].es_pared():  # Derecha
-            self.vecinos.append(grid[self.fila][self.col + 1])
+            self.vecinos.append((grid[self.fila][self.col + 1], 10))
         if self.col > 0 and not grid[self.fila][self.col - 1].es_pared():  # Izquierda
-            self.vecinos.append(grid[self.fila][self.col - 1])
+            self.vecinos.append((grid[self.fila][self.col - 1], 10))
+        
+        # Movimientos diagonales
+        if self.fila < self.total_filas - 1 and self.col < self.total_filas - 1 and not grid[self.fila + 1][self.col + 1].es_pared():  # Abajo-Derecha
+            self.vecinos.append((grid[self.fila + 1][self.col + 1], 14))
+        if self.fila < self.total_filas - 1 and self.col > 0 and not grid[self.fila + 1][self.col - 1].es_pared():  # Abajo-Izquierda
+            self.vecinos.append((grid[self.fila + 1][self.col - 1], 14))
+        if self.fila > 0 and self.col < self.total_filas - 1 and not grid[self.fila - 1][self.col + 1].es_pared():  # Arriba-Derecha
+            self.vecinos.append((grid[self.fila - 1][self.col + 1], 14))
+        if self.fila > 0 and self.col > 0 and not grid[self.fila - 1][self.col - 1].es_pared():  # Arriba-Izquierda
+            self.vecinos.append((grid[self.fila - 1][self.col - 1], 14))
     
 
 def crear_grid(filas, ancho):
@@ -179,8 +191,8 @@ def algoritmo_A_asterisco(dibujar, grid, inicio, fin):
             fin.hacer_fin()
             return True
         
-        for vecino in actual.vecinos:
-            temp_g_score = g_score[actual] + 1
+        for vecino, costo in actual.vecinos:
+            temp_g_score = g_score[actual] + costo
             
             if temp_g_score < g_score[vecino]:
                 came_from[vecino] = actual
