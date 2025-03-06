@@ -36,11 +36,13 @@ Como los principales patrones a utilizar tendríamos que recordar como es que fu
 
 #### Definir la función de activación es necesaria para este problema 
 
- Softmax?
+En este caso podriamos usar Softmax, pues bajo sus propiedades y caracteristicas podemos decir que se utilizará en la capa de salida para obtener una distribución de probabilidad sobre las posibles jugadas en el tablero.
 
 #### Definir el número máximo de entradas
 
-El numero maximo de entradas lo podemos entender de manera facil, en este caso es 20x20, lo que nos daria el equivalente 
+El numero maximo de entradas lo podemos entender de manera facil, en este caso es 20x20, lo que nos daria el equivalente a 400 entradas. 
 
 
+# ¿Cuáles son los valores máximos que puede tener el bias?
 # Bias es una neurona extra que te ghace convertir el valor 
+ - Dependera de cuanto se desea minimizar el error, en este caso se ira ajustando entre valores hasta lograr un resultado esperado
