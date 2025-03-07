@@ -72,141 +72,8 @@ En este caso podemos ver que son pasos algo complejos pero podemos en este caso 
 
 ## Aplicacion de pseudocodigo dentro del cascaron
 
-- Inicio 
-Antes de empezar hacemos una pequeña configuracion para saber cuales seran los colores que representaran los cuadros vecinos y tambien cuales seran los colores para los cuadros que estaran en la lista abierta y en la lista cerrada
 
-```Python
-
- #Lista abierta
-    def hacer_abierto(self):
-        self.color = VERDE
-    
-    #Lista Cerrada
-    def hacer_cerrado(self):
-        self.color = ROJO
-    
-    #Vecinos 
-    def hacer_camino(self):
-        self.color = AMARILLO_NEON
-```
-
-1. Nodos y valores 
-Se crea una funcion para darle valores a cada cuadricula como lo hicimos en este caso durante las practicas, siendo movimiento vertical y horizontal de 10 y diagonales en 14
-
-```Python
-def actualizar_vecinos(self, grid):
-        self.vecinos = []
-        # Movimientos verticales y horizontales
-        if self.fila < self.total_filas - 1 and not grid[self.fila + 1][self.col].es_pared():  # Abajo
-            self.vecinos.append((grid[self.fila + 1][self.col], 10))
-        if self.fila > 0 and not grid[self.fila - 1][self.col].es_pared():  # Arriba
-            self.vecinos.append((grid[self.fila - 1][self.col], 10))
-        if self.col < self.total_filas - 1 and not grid[self.fila][self.col + 1].es_pared():  # Derecha
-            self.vecinos.append((grid[self.fila][self.col + 1], 10))
-        if self.col > 0 and not grid[self.fila][self.col - 1].es_pared():  # Izquierda
-            self.vecinos.append((grid[self.fila][self.col - 1], 10))
-        
-        # Movimientos diagonales
-        if self.fila < self.total_filas - 1 and self.col < self.total_filas - 1 and not grid[self.fila + 1][self.col + 1].es_pared():  # Abajo-Derecha
-            self.vecinos.append((grid[self.fila + 1][self.col + 1], 14))
-        if self.fila < self.total_filas - 1 and self.col > 0 and not grid[self.fila + 1][self.col - 1].es_pared():  # Abajo-Izquierda
-            self.vecinos.append((grid[self.fila + 1][self.col - 1], 14))
-        if self.fila > 0 and self.col < self.total_filas - 1 and not grid[self.fila - 1][self.col + 1].es_pared():  # Arriba-Derecha
-            self.vecinos.append((grid[self.fila - 1][self.col + 1], 14))
-        if self.fila > 0 and self.col > 0 and not grid[self.fila - 1][self.col - 1].es_pared():  # Arriba-Izquierda
-            self.vecinos.append((grid[self.fila - 1][self.col - 1], 14))
-```
-
-
-1. Inicialización 
-Para esta parte necesitamos realizar las estructuras para poder calcular los valores iniciales para el nodo inicial.
-
-```Python
-def algoritmo_A_asterisco(dibujar, grid, inicio, fin):
-    count = 0
-    abiertos = []
-    heapq.heappush(abiertos, (0, count, inicio))
-    came_from = {}
-    g_score = {nodo: float("inf") for fila in grid for nodo in fila}
-    g_score[inicio] = 0
-    f_score = {nodo: float("inf") for fila in grid for nodo in fila}
-    f_score[inicio] = heuristica(inicio, fin)
-    
-    abiertos_hash = {inicio}
-```
-
-2. Expansión de Nodos
-Despues de la inicializacion se agarra el modo con menor valor, explorando los vecinos.
-
-```Python
-   while abiertos:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-        
-        actual = heapq.heappop(abiertos)[2]
-        abiertos_hash.remove(actual)
-        
-        if actual == fin:
-            reconstruir_camino(came_from, fin, dibujar)
-            fin.hacer_fin()
-            return True
-        
-        for vecino, costo in actual.vecinos:
-            temp_g_score = g_score[actual] + costo
-```
-
-3. Actualización de Nodos Vecinos
-En este apartado para cada vecino se calcula su costo y se actualiza el valor, en esta parte sucede el evento que al encontrar un camino mas corto a un vecino se actualizaran sus valores.
-
-```python
-        if temp_g_score < g_score[vecino]:
-                came_from[vecino] = actual
-                g_score[vecino] = temp_g_score
-                f_score[vecino] = temp_g_score + heuristica(vecino, fin)
-                if vecino not in abiertos_hash:
-                    count += 1
-                    heapq.heappush(abiertos, (f_score[vecino], count, vecino))
-                    abiertos_hash.add(vecino)
-                    vecino.hacer_abierto()
-        
-        dibujar()
-        
-        if actual != inicio:
-            actual.hacer_cerrado()
-```
-
-4. Heurística
-En esta parte se hace el calculo de manhattan entre dos nodos.
-
-```python
-def heuristica(nodo1, nodo2):
-    x1, y1 = nodo1.get_pos()
-    x2, y2 = nodo2.get_pos()
-    return abs(x1 - x2) + abs(y1 - y2)
-```
-
-5. Terminación
-Cuando se terminan los calculos anteriores, se extrae el nodo objetivo, lo que podemos entender como que se a encontrado el camino mas corto.
-
-```python
-        if actual == fin:
-            reconstruir_camino(came_from, fin, dibujar)
-            fin.hacer_fin()
-            return True
-```
-
-6. Reconstrucción del Camino
-Cuando encontramos el nodo final se construye el camino retrocediendo del nodo final al nodo inicial 
-
-```python
-def reconstruir_camino(came_from, actual, dibujar):
-    while actual in came_from:
-        actual = came_from[actual]
-        actual.hacer_camino()
-        dibujar()
-```
-- * Ver error 2 *
+- **Ver error 2** 
 
 # Errores dentro del codigo y su ejecucion que eh encontrado 
 
@@ -228,7 +95,7 @@ IndexError: list index out of range"
 # Problematicas a resolver 
 
 ## Problema 1 
- - Resolver que intente dibujar fuera de los limites y se detenga la ejecucion del codigo * (Resuleto) * 
+ - Resolver que intente dibujar fuera de los limites y se detenga la ejecucion del codigo **(Resuelto)** 
 
 ## Problema 2
 
