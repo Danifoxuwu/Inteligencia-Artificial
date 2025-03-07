@@ -58,8 +58,8 @@ class Nodo:
         self.color = NARANJA
 
     def hacer_pared(self):
-        self.color = GRIS_CLARO
-
+        self.color = NEGRO
+        
     def hacer_fin(self):
         self.color = PURPURA
     
@@ -99,23 +99,23 @@ class Nodo:
         self.vecinos = []
         # Movimientos verticales y horizontales
         if self.fila < self.total_filas - 1 and not grid[self.fila + 1][self.col].es_pared():  # Abajo
-            self.vecinos.append((grid[self.fila + 1][self.col], 10))
+            self.vecinos.append((grid[self.fila + 1][self.col], 1))
         if self.fila > 0 and not grid[self.fila - 1][self.col].es_pared():  # Arriba
-            self.vecinos.append((grid[self.fila - 1][self.col], 10))
+            self.vecinos.append((grid[self.fila - 1][self.col], 1))
         if self.col < self.total_filas - 1 and not grid[self.fila][self.col + 1].es_pared():  # Derecha
-            self.vecinos.append((grid[self.fila][self.col + 1], 10))
+            self.vecinos.append((grid[self.fila][self.col + 1], 1))
         if self.col > 0 and not grid[self.fila][self.col - 1].es_pared():  # Izquierda
-            self.vecinos.append((grid[self.fila][self.col - 1], 10))
+            self.vecinos.append((grid[self.fila][self.col - 1], 1))
         
         # Movimientos diagonales
         if self.fila < self.total_filas - 1 and self.col < self.total_filas - 1 and not grid[self.fila + 1][self.col + 1].es_pared():  # Abajo-Derecha
-            self.vecinos.append((grid[self.fila + 1][self.col + 1], 14))
+            self.vecinos.append((grid[self.fila + 1][self.col + 1], 1.4))
         if self.fila < self.total_filas - 1 and self.col > 0 and not grid[self.fila + 1][self.col - 1].es_pared():  # Abajo-Izquierda
-            self.vecinos.append((grid[self.fila + 1][self.col - 1], 14))
+            self.vecinos.append((grid[self.fila + 1][self.col - 1], 1.4))
         if self.fila > 0 and self.col < self.total_filas - 1 and not grid[self.fila - 1][self.col + 1].es_pared():  # Arriba-Derecha
-            self.vecinos.append((grid[self.fila - 1][self.col + 1], 14))
+            self.vecinos.append((grid[self.fila - 1][self.col + 1], 1.4))
         if self.fila > 0 and self.col > 0 and not grid[self.fila - 1][self.col - 1].es_pared():  # Arriba-Izquierda
-            self.vecinos.append((grid[self.fila - 1][self.col - 1], 14))
+            self.vecinos.append((grid[self.fila - 1][self.col - 1], 1.4))
     
 
 def crear_grid(filas, ancho):
