@@ -7,6 +7,7 @@ import pygame
 pygame.font.init()
 #Importamos heapq para la cola de prioridad
 import heapq
+import time
 
 # Configuraciones iniciales
 # Cambio del tamaño de ventana de 800x800 a 500x500
@@ -205,6 +206,7 @@ def algoritmo_A_asterisco(dibujar, grid, inicio, fin):
                     vecino.hacer_abierto()
         
         dibujar()
+        time.sleep(2)  # Add delay to slow down the visualization
         
         if actual != inicio:
             actual.hacer_cerrado()
