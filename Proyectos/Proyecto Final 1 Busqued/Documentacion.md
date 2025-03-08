@@ -224,6 +224,9 @@ IndexError: list index out of range"
 ## Problemas 2 
 - Durante la ejecucion si busca el camino mas corto, pero ignora las paredes
 
+## Problema 3
+- En este caso descubri  que cuando cambio el costo del valor del movimiento de 1 , 1.4 a 10 o 14 respectivamente, hay un error en el que la busqueda busca recorrer todo el mapa causando errores.
+
 
 # Problematicas a resolver 
 
@@ -231,7 +234,10 @@ IndexError: list index out of range"
  - Resolver que intente dibujar fuera de los limites y se detenga la ejecucion del codigo * (Resuleto) * 
 
 ## Problema 2
+ - Ignora las paredes y no hace la ruta 
 
+## Problema 3
+ - Hace un calculo raro en el que explora todo el mapa, lo cual no es correcto 
 
 # Soluciones del codigo para los problemas 
 
@@ -248,5 +254,9 @@ def obtener_click_pos(pos, filas, ancho):
     return fila, col
 ```
 
+## Solucion al problema 2
+- Se acomodo el color de las paredes porque al parecer eso genera errores al momento de hacer el calculo 
 
+## Solucion al problema 3
+- No mover los calculos ya que son los ideales para poder hacer el calculo tomando en cuenta los costos existentes
 
