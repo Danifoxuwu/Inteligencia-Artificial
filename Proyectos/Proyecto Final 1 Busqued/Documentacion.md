@@ -183,7 +183,7 @@ En esta parte se hace el calculo de manhattan entre dos nodos.
 def heuristica(nodo1, nodo2):
     x1, y1 = nodo1.get_pos()
     x2, y2 = nodo2.get_pos()
-    return abs(x1 - x2) + abs(y1 - y2)
+    return (abs(x1 - x2) + abs(y1 - y2))*10
 ```
 
 5. Terminación
