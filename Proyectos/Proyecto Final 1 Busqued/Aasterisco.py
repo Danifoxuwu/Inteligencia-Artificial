@@ -7,6 +7,7 @@ import pygame
 pygame.font.init()
 #Importamos heapq para la cola de prioridad
 import heapq
+#Importamos la libreria de tiempo para el delay 
 import time
 
 # Configuraciones iniciales
@@ -100,23 +101,23 @@ class Nodo:
         self.vecinos = []
         # Movimientos verticales y horizontales
         if self.fila < self.total_filas - 1 and not grid[self.fila + 1][self.col].es_pared():  # Abajo
-            self.vecinos.append((grid[self.fila + 1][self.col], 1))
+            self.vecinos.append((grid[self.fila + 1][self.col], 10))
         if self.fila > 0 and not grid[self.fila - 1][self.col].es_pared():  # Arriba
-            self.vecinos.append((grid[self.fila - 1][self.col], 1))
+            self.vecinos.append((grid[self.fila - 1][self.col], 10))
         if self.col < self.total_filas - 1 and not grid[self.fila][self.col + 1].es_pared():  # Derecha
-            self.vecinos.append((grid[self.fila][self.col + 1], 1))
+            self.vecinos.append((grid[self.fila][self.col + 1], 10))
         if self.col > 0 and not grid[self.fila][self.col - 1].es_pared():  # Izquierda
-            self.vecinos.append((grid[self.fila][self.col - 1], 1))
+            self.vecinos.append((grid[self.fila][self.col - 1], 10))
         
         # Movimientos diagonales
         if self.fila < self.total_filas - 1 and self.col < self.total_filas - 1 and not grid[self.fila + 1][self.col + 1].es_pared():  # Abajo-Derecha
-            self.vecinos.append((grid[self.fila + 1][self.col + 1], 1.4))
+            self.vecinos.append((grid[self.fila + 1][self.col + 1], 14))
         if self.fila < self.total_filas - 1 and self.col > 0 and not grid[self.fila + 1][self.col - 1].es_pared():  # Abajo-Izquierda
-            self.vecinos.append((grid[self.fila + 1][self.col - 1], 1.4))
+            self.vecinos.append((grid[self.fila + 1][self.col - 1], 14))
         if self.fila > 0 and self.col < self.total_filas - 1 and not grid[self.fila - 1][self.col + 1].es_pared():  # Arriba-Derecha
-            self.vecinos.append((grid[self.fila - 1][self.col + 1], 1.4))
+            self.vecinos.append((grid[self.fila - 1][self.col + 1], 14))
         if self.fila > 0 and self.col > 0 and not grid[self.fila - 1][self.col - 1].es_pared():  # Arriba-Izquierda
-            self.vecinos.append((grid[self.fila - 1][self.col - 1], 1.4))
+            self.vecinos.append((grid[self.fila - 1][self.col - 1], 14))
     
 
 def crear_grid(filas, ancho):
@@ -155,9 +156,9 @@ def obtener_click_pos(pos, filas, ancho):
 
 #Definir la funcion heuristica
 def heuristica(nodo1, nodo2):
-    x1,y1 = nodo1.get_pos()
-    x2,y2 = nodo2.get_pos()
-    return abs(x1 - x2) + abs(y1 - y2)  
+    x1, y1 = nodo1.get_pos()
+    x2, y2 = nodo2.get_pos()
+    return (abs(x1 - x2) + abs(y1 - y2)) * 10  
 
 #Definir la funcion para reconstruir el camino
 def reconstruir_camino(came_from, actual, dibujar):
@@ -206,7 +207,8 @@ def algoritmo_A_asterisco(dibujar, grid, inicio, fin):
                     vecino.hacer_abierto()
         
         dibujar()
-        time.sleep(2)  # Add delay to slow down the visualization
+        #Delay para poder ver la visualisacion del algoritmo
+        time.sleep(2)  
         
         if actual != inicio:
             actual.hacer_cerrado()
