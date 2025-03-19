@@ -208,14 +208,14 @@ def algoritmo_A_asterisco(dibujar, grid, inicio, fin):
         
         dibujar()
         #Delay para poder ver la visualisacion del algoritmo
-        time.sleep(2)  
+        #time.sleep(2)  
         
         if actual != inicio:
             actual.hacer_cerrado()
             
 #Funcion principal implementando el algoritmo A*
 def main(ventana, ancho):
-    FILAS = 10
+    FILAS = 11
     grid = crear_grid(FILAS, ancho)
 
     inicio = None
