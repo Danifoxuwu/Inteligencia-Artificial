@@ -1,12 +1,6 @@
 import pygame
 import random
 import os
-import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv1D, Flatten
-from tensorflow.keras.models import load_model
-import pickle
-
 os.chdir(os.path.dirname(__file__))
 
 # Inicializar Pygame
@@ -77,63 +71,6 @@ bala_disparada = False
 # Variables para el fondo en movimiento
 fondo_x1 = 0
 fondo_x2 = w
-
-# Ruta para guardar el modelo entrenado
-modelo_path = "modelo_entrenado.h5"
-datos_path = "datos_modelo.pkl"
-
-# Función para entrenar el modelo
-def entrenar_modelo():
-    global datos_modelo
-    if len(datos_modelo) < 10:  # Asegurarse de tener suficientes datos
-        print("No hay suficientes datos para entrenar el modelo.")
-        return False
-
-    # Preparar los datos
-    X = np.array([[v, d] for v, d, _ in datos_modelo])  # Velocidad y distancia
-    y = np.array([s for _, _, s in datos_modelo])  # Salto (1 o 0)
-
-    # Normalizar los datos
-    X = X / np.max(X, axis=0)
-
-    # Crear el modelo
-    modelo = Sequential([
-        Conv1D(32, kernel_size=2, activation='relu', input_shape=(X.shape[1], 1)),
-        Flatten(),
-        Dense(16, activation='relu'),
-        Dense(1, activation='sigmoid')
-    ])
-
-    modelo.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-    # Entrenar el modelo
-    modelo.fit(X[..., np.newaxis], y, epochs=10, batch_size=4)
-
-    # Guardar el modelo entrenado
-    modelo.save(modelo_path)
-    with open(datos_path, 'wb') as f:
-        pickle.dump(datos_modelo, f)
-
-    print("Modelo entrenado y guardado exitosamente.")
-    return True
-
-# Función para validar si el modelo está entrenado
-def validar_modelo_entrenado():
-    if not os.path.exists(modelo_path):
-        pantalla.fill(NEGRO)
-        texto = fuente.render("El modelo no está entrenado. Entrena en modo manual.", True, BLANCO)
-        pantalla.blit(texto, (w // 6, h // 2))
-        pygame.display.flip()
-        pygame.time.wait(3000)
-        return False
-    return True
-
-# Función para predecir el salto en modo automático
-def predecir_salto(velocidad, distancia):
-    modelo = load_model(modelo_path)
-    X = np.array([[velocidad, distancia]]) / np.max([[velocidad, distancia]], axis=0)
-    prediccion = modelo.predict(X[..., np.newaxis])
-    return prediccion[0][0] > 0.5  # Devuelve True si debe saltar
 
 # Función para disparar la bala
 def disparar_bala():
@@ -242,9 +179,8 @@ def mostrar_menu():
                 exit()
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_a:
-                    if validar_modelo_entrenado():
-                        modo_auto = True
-                        menu_activo = False
+                    modo_auto = True
+                    menu_activo = False
                 elif evento.key == pygame.K_m:
                     modo_auto = False
                     menu_activo = False
@@ -279,7 +215,7 @@ def main():
             if evento.type == pygame.QUIT:
                 correr = False
             if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_SPACE and en_suelo and not pausa and not modo_auto:
+                if evento.key == pygame.K_SPACE and en_suelo and not pausa:  # Detectar la tecla espacio para saltar
                     salto = True
                     en_suelo = False
                 if evento.key == pygame.K_p:  # Presiona 'p' para pausar el juego
@@ -290,14 +226,8 @@ def main():
                     exit()
 
         if not pausa:
-            if modo_auto:
-                # Modo automático: usar el modelo para predecir el salto
-                distancia = abs(jugador.x - bala.x)
-                if predecir_salto(velocidad_bala, distancia):
-                    salto = True
-                    en_suelo = False
-            else:
-                # Modo manual: el jugador controla el salto
+            # Modo manual: el jugador controla el salto
+            if not modo_auto:
                 if salto:
                     manejar_salto()
                 # Guardar los datos si estamos en modo manual
