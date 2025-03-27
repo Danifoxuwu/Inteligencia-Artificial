@@ -1,5 +1,10 @@
 import pygame
 import random
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv1D, Flatten
+from tensorflow.keras.optimizers import Adam
+import numpy as np
 
 # Inicializar Pygame
 pygame.init()
@@ -69,6 +74,10 @@ bala_disparada = False
 # Variables para el fondo en movimiento
 fondo_x1 = 0
 fondo_x2 = w
+
+# Modelo de red neuronal convolucional
+modelo = None
+entrenado = False
 
 # Función para disparar la bala
 def disparar_bala():
@@ -189,7 +198,7 @@ def mostrar_menu():
 
 # Función para reiniciar el juego tras la colisión
 def reiniciar_juego():
-    global menu_activo, jugador, bala, nave, bala_disparada, salto, en_suelo
+    global menu_activo, jugador, bala, nave, bala_disparada, salto, en_suelo, modo_auto
     menu_activo = True  # Activar de nuevo el menú
     jugador.x, jugador.y = 50, h - 100  # Reiniciar posición del jugador
     bala.x = w - 50  # Reiniciar posición de la bala
@@ -199,10 +208,69 @@ def reiniciar_juego():
     en_suelo = True
     # Mostrar los datos recopilados hasta el momento
     print("Datos recopilados para el modelo: ", datos_modelo)
+    
+    # Entrenar el modelo si se pierde en modo manual
+    if not modo_auto:
+        entrenar_modelo()
+    
     mostrar_menu()  # Mostrar el menú de nuevo para seleccionar modo
 
+# Función para entrenar la red neuronal convolucional
+def entrenar_modelo():
+    """
+    Entrena una red neuronal convolucional con los datos recopilados en modo manual.
+    """
+    global modelo, entrenado, datos_modelo
+
+    if len(datos_modelo) < 10:  # Asegurarse de tener suficientes datos
+        print("No hay suficientes datos para entrenar el modelo.")
+        return
+
+    # Preparar los datos
+    datos = np.array(datos_modelo)
+    X = datos[:, :2]  # Velocidad de la bala y distancia
+    y = datos[:, 2]   # Acción (salto o no salto)
+
+    # Expandir dimensiones para usar Conv1D
+    X = np.expand_dims(X, axis=-1)
+
+    # Crear el modelo
+    modelo = Sequential([
+        Conv1D(16, kernel_size=2, activation='relu', input_shape=(2, 1)),
+        Flatten(),
+        Dense(8, activation='relu'),
+        Dense(1, activation='sigmoid')  # Salida binaria (0 o 1)
+    ])
+    modelo.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
+
+    # Entrenar el modelo
+    modelo.fit(X, y, epochs=50, batch_size=4, verbose=1)
+    entrenado = True
+    print("Modelo entrenado exitosamente.")
+
+# Función para predecir la acción en modo automático
+def predecir_accion(velocidad, distancia):
+    """
+    Usa el modelo entrenado para predecir si el jugador debe saltar.
+    """
+    global modelo, entrenado
+
+    if not entrenado:
+        print("El modelo no está entrenado.")
+        return 0  # No saltar por defecto
+
+    # Preparar los datos de entrada
+    entrada = np.array([[velocidad, distancia]])
+    entrada = np.expand_dims(entrada, axis=-1)  # Expandir dimensiones para Conv1D
+
+    # Hacer la predicción
+    prediccion = modelo.predict(entrada)
+    print(f"Predicción: {prediccion[0][0]}, Velocidad: {velocidad}, Distancia: {distancia}")  # Depuración
+    return 1 if prediccion[0][0] > 0.57 else 0  # Cambiar el umbral a 0.57
+
+# Modificar el bucle principal para incluir el modo automático
 def main():
-    global salto, en_suelo, bala_disparada
+    global salto, en_suelo, bala_disparada, modo_auto
 
     reloj = pygame.time.Clock()
     mostrar_menu()  # Mostrar el menú al inicio
@@ -213,23 +281,31 @@ def main():
             if evento.type == pygame.QUIT:
                 correr = False
             if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_SPACE and en_suelo and not pausa:  # Detectar la tecla espacio para saltar
+                if evento.key == pygame.K_SPACE and en_suelo and not pausa and not modo_auto:  # Salto manual
                     salto = True
                     en_suelo = False
-                if evento.key == pygame.K_p:  # Presiona 'p' para pausar el juego
+                if evento.key == pygame.K_p:  # Pausar el juego
                     pausa_juego()
-                if evento.key == pygame.K_q:  # Presiona 'q' para terminar el juego
+                if evento.key == pygame.K_q:  # Terminar el juego
                     print("Juego terminado. Datos recopilados:", datos_modelo)
                     pygame.quit()
                     exit()
+                if evento.key == pygame.K_t:  # Entrenar el modelo
+                    entrenar_modelo()
 
         if not pausa:
-            # Modo manual: el jugador controla el salto
-            if not modo_auto:
+            if modo_auto:  # Modo automático
+                distancia = abs(jugador.x - bala.x)
+                accion = predecir_accion(velocidad_bala, distancia)
+                if accion == 1 and en_suelo:  # Si la predicción es 1 y está en el suelo
+                    salto = True
+                    en_suelo = False
+                if salto:  # Manejar el salto en modo automático
+                    manejar_salto()
+            else:  # Modo manual
                 if salto:
                     manejar_salto()
-                # Guardar los datos si estamos en modo manual
-                guardar_datos()
+                guardar_datos()  # Guardar datos en modo manual
 
             # Actualizar el juego
             if not bala_disparada:
