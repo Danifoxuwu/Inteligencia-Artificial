@@ -1,4 +1,119 @@
 # Cambios en el codigo base 
+En este caso el código ha sido modificado para incluir nuevas funcionalidades relacionadas con el modo automático, el entrenamiento de un modelo de red neuronal y la predicción de acciones para generar le modo automatico apartir de un entrenamiento en el modo manual.
+
+- Como primer punto podemos hablar de la parte del entrenamiento del modelo en el que se agrego la funcion entrenar_modelo, que utiliza una red neuronal convolucional para ser entrenada y poder usar los datos recopilados en el modo manual, esto permite que usando la red neuronal el juego prediga automaticamente cuando debe saltar.
+
+```Python 
+def entrenar_modelo():
+    """
+    Entrena una red neuronal convolucional con los datos recopilados en modo manual.
+    """
+    global modelo, entrenado, datos_modelo
+
+    if len(datos_modelo) < 10:  # Asegurarse de tener suficientes datos
+        print("No hay suficientes datos para entrenar el modelo.")
+        return
+
+    # Preparar los datos
+    datos = np.array(datos_modelo)
+    X = datos[:, :2]  # Velocidad de la bala y distancia
+    y = datos[:, 2]   # Acción (salto o no salto)
+
+    # Expandir dimensiones para usar Conv1D
+    X = np.expand_dims(X, axis=-1)
+
+    # Crear el modelo
+    modelo = Sequential([
+        Conv1D(16, kernel_size=2, activation='relu', input_shape=(2, 1)),
+        Flatten(),
+        Dense(8, activation='relu'),
+        Dense(1, activation='sigmoid')  # Salida binaria (0 o 1)
+    ])
+    modelo.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
+
+    # Entrenar el modelo
+    modelo.fit(X, y, epochs=50, batch_size=4, verbose=1)
+    entrenado = True
+    print("Modelo entrenado exitosamente.")
+```
+- Este punto en general lo que hace es crear y entrenar un modelo de red neuronal convolucional con los datos recopilados en el modo manual.
+
+- Como segundo paso se añadio la funcion predecir_accion que utiliza el modelo entrenado para predecir si el jugador debe saltar en modo automatico.
+
+```Python
+def predecir_accion(velocidad, distancia):
+    """
+    Usa el modelo entrenado para predecir si el jugador debe saltar.
+    """
+    global modelo, entrenado
+
+    if not entrenado:
+        print("El modelo no está entrenado.")
+        return 0  # No saltar por defecto
+
+    # Preparar los datos de entrada
+    entrada = np.array([[velocidad, distancia]])
+    entrada = np.expand_dims(entrada, axis=-1)  # Expandir dimensiones para Conv1D
+
+    # Hacer la predicción
+    prediccion = modelo.predict(entrada)
+    print(f"Predicción: {prediccion[0][0]}, Velocidad: {velocidad}, Distancia: {distancia}")  # Depuración
+    return 1 if prediccion[0][0] > 0.57 else 0  # Cambiar el umbral a 0.57
+```
+
+- Por ultima parte se agrego dentro del bucle principal el modo automatico, con la opcion de poder entrenar el modelo presionando la tecla T.
+```Python
+def main():
+    global salto, en_suelo, bala_disparada, modo_auto
+
+    reloj = pygame.time.Clock()
+    mostrar_menu()  # Mostrar el menú al inicio
+    correr = True
+
+    while correr:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                correr = False
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_SPACE and en_suelo and not pausa and not modo_auto:  # Salto manual
+                    salto = True
+                    en_suelo = False
+                if evento.key == pygame.K_p:  # Pausar el juego
+                    pausa_juego()
+                if evento.key == pygame.K_q:  # Terminar el juego
+                    print("Juego terminado. Datos recopilados:", datos_modelo)
+                    pygame.quit()
+                    exit()
+                if evento.key == pygame.K_t:  # Entrenar el modelo
+                    entrenar_modelo()
+
+        if not pausa:
+            if modo_auto:  # Modo automático
+                distancia = abs(jugador.x - bala.x)
+                accion = predecir_accion(velocidad_bala, distancia)
+                if accion == 1 and en_suelo:  # Si la predicción es 1 y está en el suelo
+                    salto = True
+                    en_suelo = False
+                if salto:  # Manejar el salto en modo automático
+                    manejar_salto()
+            else:  # Modo manual
+                if salto:
+                    manejar_salto()
+                guardar_datos()  # Guardar datos en modo manual
+
+            # Actualizar el juego
+            if not bala_disparada:
+                disparar_bala()
+            update()
+
+        # Actualizar la pantalla
+        pygame.display.flip()
+        reloj.tick(30)  # Limitar el juego a 30 FPS
+
+    pygame.quit()
+```
+
+- Como extra se agrego la fucion para entrenar el modelo automaticamente si el jugador pierde en el modo manual, saliendo presionando A a continuacion para ejecutar el modo automatico.
 
 
 ## Aplicacion Cascaron
