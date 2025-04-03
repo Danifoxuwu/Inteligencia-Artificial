@@ -256,12 +256,12 @@ def predecir_accion(velocidad, distancia):
 
     # Preparar los datos de entrada
     entrada = np.array([[velocidad, distancia]])
-    entrada = np.expand_dims(entrada, axis=-1)  # Expandir dimensiones para Conv1D
+    entrada = np.expand_dims(entrada, axis=-1)  
 
     # Hacer la predicción
     prediccion = modelo.predict(entrada)
     print(f"Predicción: {prediccion[0][0]}, Velocidad: {velocidad}, Distancia: {distancia}")  # Depuración
-    return 1 if prediccion[0][0] > 0.57 else 0  # Cambiar el umbral a 0.57
+    return 1 if prediccion[0][0] > 0.57 else 0 
 
 # Modificar el bucle principal para incluir el modo automático
 def main():
