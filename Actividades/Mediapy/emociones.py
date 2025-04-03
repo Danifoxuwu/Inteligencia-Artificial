@@ -527,7 +527,6 @@ def detectar_vida(frame, prev_frame):
     return movimiento > 0.02 or cambio_luz > 5  # Umbrales ajustables
 
 def draw_landmarks_and_connections(frame, puntos, connections):
-    """Dibuja puntos y líneas en la cara basados en las conexiones."""
     # Dibujar puntos
     for idx, (x, y) in puntos.items():
         cv2.circle(frame, (x, y), 2, (0, 255, 0), -1)  # Puntos en verde
@@ -581,12 +580,6 @@ while cap.isOpened():
 
             # Dibujar puntos y conexiones de las regiones faciales
             draw_landmarks_and_connections(frame, puntos, FACEMESH_CONTOURS)
-
-    # Detección de rostro con Haar cascades
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray_frame, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
     cv2.imshow('PuntosFacialesMediaPipe', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):

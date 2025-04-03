@@ -217,9 +217,7 @@ def reiniciar_juego():
 
 # Función para entrenar la red neuronal convolucional
 def entrenar_modelo():
-    """
-    Entrena una red neuronal convolucional con los datos recopilados en modo manual.
-    """
+
     global modelo, entrenado, datos_modelo
 
     if len(datos_modelo) < 10:  # Asegurarse de tener suficientes datos
@@ -250,9 +248,6 @@ def entrenar_modelo():
 
 # Función para predecir la acción en modo automático
 def predecir_accion(velocidad, distancia):
-    """
-    Usa el modelo entrenado para predecir si el jugador debe saltar.
-    """
     global modelo, entrenado
 
     if not entrenado:
