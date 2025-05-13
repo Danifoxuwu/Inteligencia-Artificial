@@ -137,8 +137,7 @@ def inicializar_csv():
         with open(csv_file_path, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["velocidad_bala", "distancia_horizontal", "distancia_vertical", 
-                             "jugador_pos_x", "jugador_pos_y", "bala_pos_x", "bala_pos_y", 
-                             "bala_vertical_pos_x", "bala_vertical_pos_y", "accion"])
+                             "jugador_pos_x", "jugador_pos_y", "accion"])
 
 # Función para disparar la bala
 def disparar_bala():
@@ -271,28 +270,26 @@ def guardar_datos(accion):
     global jugador, bala, bala_vertical, velocidad_bala, salto
     distancia_horizontal = abs(jugador.x - bala.x)
     distancia_vertical = abs(jugador.y - bala_vertical.y)
-    salto_hecho = 1 if salto else 0  # 1 si saltó, 0 si no saltó
-    # Guardar velocidad de la bala, distancias, posiciones y acción tomada
+    if bala_vertical.y > jugador.y:  # Si la bala está por debajo del jugador
+        distancia_vertical = 0  # Distancia vertical es 0 si ya pasó al jugador
+
+    # Guardar velocidad de la bala, distancias, posiciones del jugador y acción tomada
     datos_modelo.append({
         "velocidad_bala": velocidad_bala,
         "distancia_horizontal": distancia_horizontal,
         "distancia_vertical": distancia_vertical,
         "jugador_pos": (jugador.x, jugador.y),
-        "bala_pos": (bala.x, bala.y),
-        "bala_vertical_pos": (bala_vertical.x, bala_vertical.y),
         "accion": accion
     })
     # Guardar en el archivo CSV
     with open(csv_file_path, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([velocidad_bala, distancia_horizontal, distancia_vertical, 
-                         jugador.x, jugador.y, bala.x, bala.y, 
-                         bala_vertical.x, bala_vertical.y, accion])
+                         jugador.x, jugador.y, accion])
     # Imprimir los datos guardados
     print(f"Datos guardados: Velocidad Bala: {velocidad_bala}, "
           f"Distancia Horizontal: {distancia_horizontal}, Distancia Vertical: {distancia_vertical}, "
-          f"Posición Jugador: {jugador.x, jugador.y}, Posición Bala: {bala.x, bala.y}, "
-          f"Posición Bala Vertical: {bala_vertical.x, bala_vertical.y}, Acción: {accion}")
+          f"Posición Jugador: {jugador.x, jugador.y}, Acción: {accion}")
 
 # Función para pausar el juego y guardar los datos
 def pausa_juego():
