@@ -1,7 +1,6 @@
 import pygame
 import random
 import os
-import csv
 
 # Inicializar Pygame
 pygame.init()
@@ -130,15 +129,6 @@ nave_frame_velocidad = 7  # Velocidad de cambio de frame
 fondo_x1 = 0
 fondo_x2 = w
 
-# Inicializar el archivo CSV
-csv_file_path = os.path.join(base_path, 'datos_modelo.csv')
-def inicializar_csv():
-    if not os.path.exists(csv_file_path):
-        with open(csv_file_path, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["velocidad_bala", "distancia_horizontal", "distancia_vertical", 
-                             "jugador_pos_x", "jugador_pos_y", "accion"])
-
 # Función para disparar la bala
 def disparar_bala():
     global bala_disparada, velocidad_bala
@@ -265,7 +255,7 @@ def update(permitir_bala_vertical=True):
         print("Colisión detectada!")
         reiniciar_juego()  # Terminar el juego y mostrar el menú
 
-# Función para guardar datos del modelo en modo manual
+# Función para guardar datos del modelo en modo manual (solo en memoria)
 def guardar_datos(accion):
     global jugador, bala, bala_vertical, velocidad_bala, salto
     distancia_horizontal = abs(jugador.x - bala.x)
@@ -281,11 +271,6 @@ def guardar_datos(accion):
         "jugador_pos": (jugador.x, jugador.y),
         "accion": accion
     })
-    # Guardar en el archivo CSV
-    with open(csv_file_path, mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([velocidad_bala, distancia_horizontal, distancia_vertical, 
-                         jugador.x, jugador.y, accion])
     # Imprimir los datos guardados
     print(f"Datos guardados: Velocidad Bala: {velocidad_bala}, "
           f"Distancia Horizontal: {distancia_horizontal}, Distancia Vertical: {distancia_vertical}, "
@@ -388,9 +373,6 @@ def reiniciar_juego():
 
 def main():
     global salto, en_suelo, bala_disparada, jugador
-
-    # Inicializar el archivo CSV
-    inicializar_csv()
 
     reloj = pygame.time.Clock()
     mostrar_menu()  # Mostrar el menú al inicio
