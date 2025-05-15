@@ -109,7 +109,13 @@ frame_count = 0
 # Variables para el movimiento del jugador
 pos_x_min = 20  # Límite mínimo de movimiento hacia la izquierda
 pos_x_max = 100  # Límite máximo de movimiento hacia la derecha
-velocidad_x = 30  # Velocidad de movimiento lateral
+velocidad_x = 50  # Velocidad de movimiento lateral
+
+# Variables para el retroceso automático
+retrocediendo = False
+tiempo_movimiento = 0
+TIEMPO_RETORNO = 1500  # milisegundos (1.5 segundos)
+posicion_origen = (50, h - 100)
 
 # Variables para la bala
 velocidad_bala = -10  # Velocidad de la bala hacia la izquierda
@@ -372,7 +378,7 @@ def reiniciar_juego():
     mostrar_menu()  # Mostrar el menú de nuevo para seleccionar modo
 
 def main():
-    global salto, en_suelo, bala_disparada, jugador
+    global salto, en_suelo, bala_disparada, jugador, retrocediendo, tiempo_movimiento
 
     reloj = pygame.time.Clock()
     mostrar_menu()  # Mostrar el menú al inicio
@@ -393,20 +399,34 @@ def main():
                     salto = True
                     en_suelo = False
                     accion = 1  # Acción: salto
-                if evento.key == pygame.K_LEFT and not pausa:  # Mover izquierda
+                if evento.key == pygame.K_LEFT and not pausa and not retrocediendo:  # Mover izquierda
                     if jugador.x > pos_x_min:
                         jugador.x -= velocidad_x
                         accion = 2  # Acción: izquierda
-                if evento.key == pygame.K_RIGHT and not pausa:  # Mover derecha
+                        retrocediendo = True
+                        tiempo_movimiento = tiempo_actual
+                if evento.key == pygame.K_RIGHT and not pausa and not retrocediendo:  # Mover derecha
                     if jugador.x < pos_x_max:
                         jugador.x += velocidad_x
                         accion = 3  # Acción: derecha
+                        retrocediendo = True
+                        tiempo_movimiento = tiempo_actual
                 if evento.key == pygame.K_p:  # Presiona 'p' para pausar el juego
                     pausa_juego()
                 if evento.key == pygame.K_q:  # Presiona 'q' para terminar el juego
                     print("Juego terminado. Datos recopilados:", datos_modelo)
                     pygame.quit()
                     exit()
+
+        # Lógica para regresar al origen después de 1 segundo
+        if retrocediendo and tiempo_actual - tiempo_movimiento >= TIEMPO_RETORNO:
+            if salto:
+                distancia_suelo = h - 100 - jugador.y
+                jugador.x = posicion_origen[0]
+                jugador.y = h - 100 - distancia_suelo
+            else:
+                jugador.x, jugador.y = posicion_origen
+            retrocediendo = False
 
         if not pausa:
             # Modo manual: el jugador controla el salto
