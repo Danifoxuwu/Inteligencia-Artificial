@@ -1,40 +1,47 @@
 import pygame
 import random
+import pandas as pd
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import pandas as pd
 import os
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from modelo_red import entrenar_modelo, decidir_salto, entrenar_red_movimiento, decidir_movimiento
 
 # Inicializar Pygame
 pygame.init()
 
-# Inicializar el mezclador de sonido
-pygame.mixer.init()
+# Obtener la ruta base del proyecto
+base_path = os.path.dirname(os.path.abspath(__file__))
 
 # Dimensiones de la pantalla
 w, h = 800, 400
 pantalla = pygame.display.set_mode((w, h))
-pygame.display.set_caption("Juego: Disparo de Bala, Salto, Nave y Menú")
+pygame.display.set_caption("Juego: Disparo de Bala_suelo, Bala_aire, Salto, bowser y Menú")
 
 # Colores
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
+ROJO = (255, 0, 0)
+AZUL = (0, 0, 255)
 
-# Variables del jugador, bala, nave, fondo, etc.
+# Variables del jugador, balas, bowser, fondo, etc.
 jugador = None
-bala = None
+bala_suelo = None
+bala_aire = None
 fondo = None
-nave = None
+bowser = None
 menu = None
-
-# Variables de la bala vertical
-bala_vertical = None
-velocidad_bala_vertical = 4  #velocidad *ajustar despues
-bala_vertical_disparada = False
-tiempo_ultimo_disparo = 0
 
 # Variables de salto
 salto = False
 salto_altura = 15  # Velocidad inicial de salto
 gravedad = 1
 en_suelo = True
+subiendo = True
 
 # Variables de pausa y menú
 pausa = False
@@ -44,10 +51,15 @@ modo_auto = False  # Indica si el modo de juego es automático
 
 # Lista para guardar los datos de velocidad, distancia y salto (target)
 datos_modelo = []
+modelo_entrenado = None
 
-# Cargar las imágenes
-base_path = os.path.dirname(__file__)
+datos_movimiento = []
+modelo_entrenado_movimiento = []
 
+intervalo_decidir_salto = 1  # Ejecutar decidir_salto cada 10 frames
+contador_decidir_salto = 0
+
+# Cargar imágenes
 jugador_frames = [
     pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'assets 2/kirby 1.png')), (48, 48)),
     pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'assets 2/kirby 2.png')), (48, 48)),
@@ -60,7 +72,6 @@ jugador_frames = [
     pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'assets 2/kirby 9.png')), (48, 48)),
     pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'assets 2/kirby 10.png')), (48, 48))
 ]
-
 
 bala_frames = [
     pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'assets 2/apple1.png')), (40, 40)),
@@ -82,368 +93,334 @@ nave_frames = [
 ]
 
 fondo_img = pygame.image.load(os.path.join(base_path, 'assets 2/Radish Ruins 1.png'))
-menu_img = pygame.image.load(os.path.join(base_path, 'assets/game/menu.png'))
-
-# Cargar la música de fondo
-musica_fondo = os.path.join(base_path, 'assets 2/music/Kirby Nightmare in Dreamland .ogg')
-pygame.mixer.music.load(musica_fondo)
-
-# Configurar el volumen de la música (opcional)
-pygame.mixer.music.set_volume(0.5)  # Volumen entre 0.0 y 1.0
-
-# Escalar la imagen de fondo para que coincida con el tamaño de la pantalla
 fondo_img = pygame.transform.scale(fondo_img, (w, h))
 
-# Crear el rectángulo del jugador y de la bala
+# Crear los rectángulos del jugador, balas y bowser
 jugador = pygame.Rect(50, h - 100, 32, 48)
-bala = pygame.Rect(w - 50, h - 90, 16, 16)
-nave = pygame.Rect(w - 100, h - 100, 64, 64)
-menu_rect = pygame.Rect(w // 2 - 135, h // 2 - 90, 270, 180)  # Tamaño del menú
+bala_suelo = pygame.Rect(w - 50, h - 90, 16, 16)
+bala_aire = pygame.Rect(0, -50, 16, 16)  # Comienza arriba de la pantalla
+bowser = pygame.Rect(w - 100, h - 130, 64, 64)
+shyguy = pygame.Rect(0, 0, 64, 64)  # Rectángulo para el enemigo
 
-bala_vertical = pygame.Rect(jugador.x + 16, 0, 16, 16) 
+# Variables para el movimiento en zigzag y disparos del Shy Guy
+zigzag_direccion = 1  # 1 para derecha, -1 para izquierda
+zigzag_velocidad = 5  # Velocidad del movimiento en zigzag
+shyguy_disparo_cooldown = 0
+shyguy_disparo_intervalo = 60  # frames entre disparos
+velocidad_bala_aire = [0, 5]  # [velocidad_x, velocidad_y]
+
+menu_rect = pygame.Rect(w // 2 - 135, h // 2 - 90, 270, 180)  # Tamaño del menú
 
 # Variables para la animación del jugador
 current_frame = 0
 frame_speed = 10  # Cuántos frames antes de cambiar a la siguiente imagen
 frame_count = 0
-# Variables para el movimiento del jugador
-pos_x_min = 20  # Límite mínimo de movimiento hacia la izquierda
-pos_x_max = 100  # Límite máximo de movimiento hacia la derecha
-velocidad_x = 50  # Velocidad de movimiento lateral
 
-# Variables para el retroceso automático
-retrocediendo = False
-tiempo_movimiento = 0
-TIEMPO_RETORNO = 1500  # milisegundos (1.5 segundos)
-posicion_origen = (50, h - 100)
-
-# Variables para la bala
-velocidad_bala = -10  # Velocidad de la bala hacia la izquierda
-bala_disparada = False
-
-# Variables para la animación de la bala
-bala_frame_actual = 0
-bala_frame_contador = 0
-bala_frame_velocidad = 5  # Velocidad de cambio de frame
-
-# Variables para la animación de la nave
-nave_frame_actual = 0
-nave_frame_contador = 0
-nave_frame_velocidad = 7  # Velocidad de cambio de frame
+# Variables para las balas
+velocidad_bala_suelo = -10  # Velocidad de la bala_suelo hacia la izquierda
+bala_disparada_suelo = False
+bala_disparada_aire = False
 
 # Variables para el fondo en movimiento
 fondo_x1 = 0
 fondo_x2 = w
 
-# Función para disparar la bala
+# Temporizador para bala aérea
+ultimo_disparo_aire = 0
+
+# ---------------- FUNCIONES DEL SHY GUY ----------------
+def mover_shyguy():
+    global shyguy, zigzag_direccion, shyguy_disparo_cooldown
+    shyguy.x += zigzag_direccion * zigzag_velocidad
+    shyguy_disparo_cooldown -= 1
+    
+    # Cambiar dirección al alcanzar los límites
+    if shyguy.x <= 0 or shyguy.x >= 200 - shyguy.width:
+        zigzag_direccion *= -1
+
+def disparar_bala_aire():
+    global bala_aire, bala_disparada_aire, velocidad_bala_aire, ultimo_disparo_aire, shyguy_disparo_cooldown
+    
+    # Solo disparar si el cooldown ha terminado y el Shy Guy está en pantalla
+    if not bala_disparada_aire and shyguy_disparo_cooldown <= 0 and 0 <= shyguy.x <= w:
+        # La bala comienza en la posición del Shy Guy
+        bala_aire.x = shyguy.x + shyguy.width // 2 - bala_aire.width // 2
+        bala_aire.y = shyguy.y + shyguy.height
+        
+        # Velocidad con componente vertical fija para disparo en línea recta
+        velocidad_bala_aire[0] = 0  # Sin componente horizontal
+        velocidad_bala_aire[1] = 5  # Velocidad vertical constante
+        
+        bala_disparada_aire = True
+        shyguy_disparo_cooldown = shyguy_disparo_intervalo
+        ultimo_disparo_aire = pygame.time.get_ticks()
+
+# ---------------- FUNCIONES DEL JUEGO ----------------
 def disparar_bala():
-    global bala_disparada, velocidad_bala
-    if not bala_disparada:
-        velocidad_bala = random.randint(-8, -3)  # Velocidad aleatoria negativa para la bala
-        bala_disparada = True
+    global bala_disparada_suelo, velocidad_bala_suelo
+    if not bala_disparada_suelo:
+        velocidad_bala_suelo = random.randint(-8, -3)
+        bala_disparada_suelo = True
 
-# Función para disparar la bala vertical
-def disparar_bala_vertical():
-    global bala_vertical_disparada, bala_vertical
-    if not bala_vertical_disparada:
-        bala_vertical.x = jugador.x + 16  # Centrar la bala con el jugador
-        bala_vertical.y = 0  # Iniciar desde la parte superior
-        bala_vertical_disparada = True
+def mover_jugador():
+    global jugador, en_suelo, salto, pos_actual
+    keys = pygame.key.get_pressed()
+    pos_actual = 1  # Posición inicial en el centro
+    # Limitar el movimiento del jugador al rango de 0 a 200
+    if keys[pygame.K_LEFT] and jugador.x > 0:
+        jugador.x -= 5
+        pos_actual = 0
+    if keys[pygame.K_RIGHT] and jugador.x < 200 - jugador.width:
+        jugador.x += 5
+        pos_actual = 2
+    if keys[pygame.K_UP] and en_suelo:
+        salto = True
+        en_suelo = False
+    
+    distancia_x = (jugador.centerx - bala_aire.centerx)
+    distancia_y = (jugador.centery - bala_aire.centery)
+    distancia_total = (distancia_x**2 + distancia_y**2) ** 0.5
+    
+    print(f"Posicion Actual : {jugador.x} |  Posicion de la bala {bala_aire.centerx} | Distancia horizontal aire(x): {distancia_x} | Distancia vertical aire(y): {distancia_y} | Velocidad Bala Aire: {velocidad_bala_aire} ", end="\r")  
 
-# Función para reiniciar la posición de la bala
+def mover_jugador_automatico(modelo_movimiento):
+    global jugador, pos_actual
+
+    jugador.x, pos_actual = decidir_movimiento(jugador, bala_aire, modelo_movimiento, salto)
+
+    distancia_x = jugador.centerx - bala_aire.centerx
+    distancia_y = jugador.centery - bala_aire.centery
+    datos_movimiento.append((distancia_x, distancia_y, jugador.x, bala_aire.centerx, pos_actual))
+
 def reset_bala():
-    global bala, bala_disparada
-    bala.x = w - 50  # Reiniciar la posición de la bala
-    bala_disparada = False
+    global bala_suelo, bala_disparada_suelo
+    bala_suelo.x = w - 50
+    bala_disparada_suelo = False
+    
+def reset_bala_aire():
+    global bala_aire, bala_disparada_aire
+    bala_aire.y = -50
+    bala_disparada_aire = False    
 
-# Función para manejar el salto
 def manejar_salto():
-    global jugador, salto, salto_altura, gravedad, en_suelo
+    global jugador, salto, salto_altura, gravedad, en_suelo, subiendo
 
     if salto:
-        jugador.y -= salto_altura  # Mover al jugador hacia arriba
-        salto_altura -= gravedad  # Aplicar gravedad (reduce la velocidad del salto)
+        if subiendo:
+            jugador.y -= salto_altura
+            salto_altura -= gravedad
 
-        # Si el jugador llega al suelo, detener el salto
-        if jugador.y >= h - 100:
-            jugador.y = h - 100
-            salto = False
-            salto_altura = 15  # Restablecer la velocidad de salto
-            en_suelo = True
+            if salto_altura <= 0:
+                subiendo = False
+        else:
+            jugador.y += salto_altura
+            salto_altura += gravedad
 
+            if jugador.y >= h - 100:
+                jugador.y = h - 100
+                salto = False
+                salto_altura = 15
+                subiendo = True
+                en_suelo = True
 
-# Función para actualizar el juego
-def update(permitir_bala_vertical=True):
-    global bala, velocidad_bala, current_frame, frame_count, fondo_x1, fondo_x2, bala_vertical, bala_vertical_disparada, tiempo_ultimo_disparo, bala_frame_actual, bala_frame_contador, nave_frame_actual, nave_frame_contador
-
-    # Lógica para disparar la bala vertical aleatoriamente (solo si está permitido)
-    tiempo_actual = pygame.time.get_ticks()
-    if permitir_bala_vertical and not bala_vertical_disparada and tiempo_actual - tiempo_ultimo_disparo > random.randint(2000, 5000):
-        disparar_bala_vertical()
-        tiempo_ultimo_disparo = tiempo_actual
-
-
+def update():
+    global bala_suelo, bala_aire, current_frame, frame_count, fondo_x1, fondo_x2
+    mover_shyguy()
+    
     # Mover el fondo
-    fondo_x1 -= 1
-    fondo_x2 -= 1
+    fondo_x1 -= 3
+    fondo_x2 -= 3
 
-    # Si el primer fondo sale de la pantalla, lo movemos detrás del segundo
     if fondo_x1 <= -w:
         fondo_x1 = w
-
-    # Si el segundo fondo sale de la pantalla, lo movemos detrás del primero
     if fondo_x2 <= -w:
         fondo_x2 = w
 
-    # Dibujar los fondos
     pantalla.blit(fondo_img, (fondo_x1, 0))
     pantalla.blit(fondo_img, (fondo_x2, 0))
 
     # Animación del jugador
-    frame_count += 1
-    if frame_count >= frame_speed:
-        current_frame = (current_frame + 1) % len(jugador_frames)
-        frame_count = 0
+    if salto:
+        if subiendo:
+            pantalla.blit(jugador_frames[0], (jugador.x, jugador.y))
+        else:
+            pantalla.blit(jugador_frames[1], (jugador.x, jugador.y))
+    else:
+        frame_count += 10
+        if frame_count >= frame_speed:
+            current_frame = (current_frame + 1) % len(jugador_frames)
+            frame_count = 0
+        pantalla.blit(jugador_frames[current_frame], (jugador.x, jugador.y))
 
-    # Dibujar el jugador con la animación
-    pantalla.blit(jugador_frames[current_frame], (jugador.x, jugador.y))
+    # Dibujar enemigos y balas
+    pantalla.blit(nave_frames[current_frame % len(nave_frames)], (bowser.x, bowser.y))
+    pantalla.blit(nave_frames[current_frame % len(nave_frames)], (shyguy.x, shyguy.y+75))
 
-    # Animación de la nave
-    nave_frame_contador += 1
-    if nave_frame_contador >= nave_frame_velocidad:
-        nave_frame_actual = (nave_frame_actual + 1) % len(nave_frames)
-        nave_frame_contador = 0
+    # Mover y dibujar balas
+    if bala_disparada_suelo:
+        bala_suelo.x += velocidad_bala_suelo
+        pantalla.blit(bala_frames[current_frame % len(bala_frames)], (bala_suelo.x, bala_suelo.y))
+        
+    if bala_disparada_aire:
+        bala_aire.x += velocidad_bala_aire[0]  # Componente horizontal
+        bala_aire.y += velocidad_bala_aire[1]  # Componente vertical
+        pantalla.blit(bala_frames[current_frame % len(bala_frames)], (bala_aire.x, bala_aire.y))
 
-    # Dibujar la nave animada
-    pantalla.blit(nave_frames[nave_frame_actual], (nave.x, nave.y))
-
-    # Mover y dibujar la bala
-    if bala_disparada:
-        bala.x += velocidad_bala
-
-    # Si la bala sale de la pantalla, reiniciar su posición
-    if bala.x < 0:
+    # Reiniciar balas cuando salen de pantalla
+    if bala_suelo.x < 0:
         reset_bala()
-
-    # Animación de la bala
-    bala_frame_contador += 1
-    if bala_frame_contador >= bala_frame_velocidad:
-        bala_frame_actual = (bala_frame_actual + 1) % len(bala_frames)
-        bala_frame_contador = 0
-
-    # Dibujar la bala animada
-    pantalla.blit(bala_frames[bala_frame_actual], (bala.x, bala.y))
-
-    # Mover y dibujar la bala vertical
-    if bala_vertical_disparada:
-        bala_vertical.y += velocidad_bala_vertical
         
-        # Si la bala llega al suelo, resetearla
-        if bala_vertical.y > h:
-            bala_vertical_disparada = False
-        
-        # Animación de la bala vertical
-        bala_frame_contador += 1
-        if bala_frame_contador >= bala_frame_velocidad:
-            bala_frame_actual = (bala_frame_actual + 1) % len(bala_frames)
-            bala_frame_contador = 0
+    if bala_aire.y > h or bala_aire.x < 0 or bala_aire.x > w:
+        reset_bala_aire()
 
-        # Dibujar la bala vertical animada
-        pantalla.blit(bala_frames[bala_frame_actual], (bala_vertical.x, bala_vertical.y))
-        
-        # Colisión con el jugador
-        if jugador.colliderect(bala_vertical):
-            print("Colisión con bala vertical detectada!")
-            reiniciar_juego()
-
-    # Colisión entre la bala y el jugador
-    if jugador.colliderect(bala):
+    # Detectar colisiones
+    if jugador.colliderect(bala_suelo) or jugador.colliderect(bala_aire):
         print("Colisión detectada!")
-        reiniciar_juego()  # Terminar el juego y mostrar el menú
+        reiniciar_juego()
 
-# Función para guardar datos del modelo en modo manual (solo en memoria)
-def guardar_datos(accion):
-    global jugador, bala, bala_vertical, velocidad_bala
-    # Solo guardar acciones izquierda (2), derecha (3), nada (0)
-    if accion == 1:
-        return  # No guardar saltos
+def guardar_datos():
+    global jugador, bala_suelo, velocidad_bala_suelo, salto
+    distancia_suelo = abs(jugador.x - bala_suelo.x)
+    salto_hecho = 1 if salto else 0
 
-    distancia_x = abs(jugador.x - bala.x)
-    distancia_y = abs(jugador.y - bala_vertical.y)
-    jugador_x = jugador.x
-    bala_vertical_center = bala_vertical.center
+    distancia_aire_x = abs(jugador.centerx - bala_aire.centerx)
+    distancia_aire_y = abs(jugador.centery - bala_aire.centery)
+    hay_bala_aire = 1 if bala_disparada_aire else 0
 
-    datos_modelo.append({
-        "velocidad_bala": velocidad_bala,
-        "distancia_x": distancia_x,
-        "distancia_y": distancia_y,
-        "jugador_x": jugador_x,
-        "bala_vertical_center": bala_vertical_center,
-        "ultima_accion": accion
-    })
+    datos_modelo.append((
+        velocidad_bala_suelo,
+        distancia_suelo,
+        distancia_aire_x,
+        distancia_aire_y,
+        hay_bala_aire,
+        jugador.x,
+        salto_hecho
+    ))
 
-    print(f"Datos guardados: velocidad_bala={velocidad_bala}, distancia_x={distancia_x}, distancia_y={distancia_y}, jugador_x={jugador_x}, bala_vertical_center={bala_vertical_center}, ultima_accion={accion}")
+    distancia_bala_suelo = abs(jugador.x - bala_suelo.x)
 
-# Función para pausar el juego y guardar los datos
+    datos_movimiento.append((
+        jugador.x,
+        jugador.y,
+        bala_aire.centerx,
+        bala_aire.centery,
+        bala_suelo.x,
+        bala_suelo.y,
+        distancia_bala_suelo,
+        1 if salto else 0,
+        pos_actual
+    ))
+
 def pausa_juego():
     global pausa
     pausa = not pausa
     if pausa:
-        print("Juego pausado. Datos registrados hasta ahora:", datos_modelo)
+        imprimir_datos()
     else:
         print("Juego reanudado.")
 
-# Función para mostrar el menú y seleccionar el modo de juego
 def mostrar_menu():
-    global menu_activo, modo_auto
-
-    # Colores para los botones
-    COLOR_BOTON = (100, 100, 255)
-    COLOR_TEXTO = (255, 255, 255)
-    COLOR_BOTON_HOVER = (150, 150, 255)
-
-    # Crear botones
-    boton_auto = pygame.Rect(w // 2 - 100, h // 2 - 60, 200, 50)
-    boton_manual = pygame.Rect(w // 2 - 100, h // 2, 200, 50)
-    boton_salir = pygame.Rect(w // 2 - 100, h // 2 + 60, 200, 50)
+    global menu_activo, modo_auto, datos_modelo, modelo_entrenado, modelo_entrenado_movimiento
+    pantalla.fill(NEGRO)
+    texto = fuente.render("'A'uto 'M'anual 'Q' para Salir", True, BLANCO)
+    pantalla.blit(texto, (w // 4, h // 2))
+    pygame.display.flip()
 
     while menu_activo:
-        pantalla.fill(NEGRO)
-
-        # Obtener la posición del mouse
-        mouse_pos = pygame.mouse.get_pos()
-        mouse_click = pygame.mouse.get_pressed()
-
-        # Dibujar botones con hover
-        pygame.draw.rect(pantalla, COLOR_BOTON_HOVER if boton_auto.collidepoint(mouse_pos) else COLOR_BOTON, boton_auto)
-        pygame.draw.rect(pantalla, COLOR_BOTON_HOVER if boton_manual.collidepoint(mouse_pos) else COLOR_BOTON, boton_manual)
-        pygame.draw.rect(pantalla, COLOR_BOTON_HOVER if boton_salir.collidepoint(mouse_pos) else COLOR_BOTON, boton_salir)
-
-        # Dibujar texto en los botones
-        texto_auto = fuente.render("Modo Auto (A)", True, COLOR_TEXTO)
-        texto_manual = fuente.render("Modo Manual (M)", True, COLOR_TEXTO)
-        texto_salir = fuente.render("Salir (Q)", True, COLOR_TEXTO)
-        pantalla.blit(texto_auto, (boton_auto.x + 20, boton_auto.y + 10))
-        pantalla.blit(texto_manual, (boton_manual.x + 20, boton_manual.y + 10))
-        pantalla.blit(texto_salir, (boton_salir.x + 20, boton_salir.y + 10))
-
-        pygame.display.flip()
-
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:  # Click izquierdo
-                if boton_auto.collidepoint(mouse_pos):
-                    modo_auto = True
-                    menu_activo = False
-                elif boton_manual.collidepoint(mouse_pos):
-                    modo_auto = False
-                    menu_activo = False
-                elif boton_salir.collidepoint(mouse_pos):
-                    print("Juego terminado. Datos recopilados:", datos_modelo)
-                    pygame.quit()
-                    exit()
-            if evento.type == pygame.KEYDOWN:  # Atajos de teclado
+            if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_a:
                     modo_auto = True
                     menu_activo = False
+                    modelo_entrenado = entrenar_modelo(datos_modelo)
+                    modelo_entrenado_movimiento = entrenar_red_movimiento(datos_movimiento)
                 elif evento.key == pygame.K_m:
                     modo_auto = False
                     menu_activo = False
                 elif evento.key == pygame.K_q:
-                    print("Juego terminado. Datos recopilados:", datos_modelo)
+                    imprimir_datos()
                     pygame.quit()
                     exit()
 
-    # Iniciar la música de fondo al salir del menú
-    pygame.mixer.music.play(-1)  # -1 para reproducir en bucle infinito
-
-# Función para reiniciar el juego tras la colisión
 def reiniciar_juego():
-    global menu_activo, jugador, bala, nave, bala_disparada, salto, en_suelo, bala_vertical_disparada, retrocediendo
-
-    # Detener la música al perder
-    pygame.mixer.music.stop()
-
-    menu_activo = True  # Activar de nuevo el menú
-    jugador.x, jugador.y = 50, h - 100  # Reiniciar posición del jugador
-    bala.x = w - 50  # Reiniciar posición de la bala
-    nave.x, nave.y = w - 100, h - 100  # Reiniciar posición de la nave
-    bala_disparada = False
-    bala_vertical_disparada = False  # Reiniciar la bala vertical
-    retrocediendo = False
+    global menu_activo, jugador, bala_suelo, bala_aire, bowser, bala_disparada_suelo, bala_disparada_aire, salto, en_suelo
+    menu_activo = True
+    jugador.x, jugador.y = 50, h - 100
+    bala_suelo.x = w - 50
+    bala_aire.y = -50
+    bowser.x, bowser.y = w - 100, h - 100
+    bala_disparada_suelo = False
+    bala_disparada_aire = False
     salto = False
     en_suelo = True
-    # Mostrar los datos recopilados hasta el momento
-    print("Datos recopilados para el modelo: ", datos_modelo)
-    mostrar_menu()  # Mostrar el menú de nuevo para seleccionar modo
+    imprimir_datos()
+    mostrar_menu()
 
+def imprimir_datos():
+    for dato in datos_movimiento:
+        print(dato)
+        
 def main():
-    global salto, en_suelo, bala_disparada, jugador, retrocediendo, tiempo_movimiento
+    global salto, en_suelo, bala_disparada_suelo, bala_disparada_aire, contador_decidir_salto
 
     reloj = pygame.time.Clock()
-    mostrar_menu()  # Mostrar el menú al inicio
+    mostrar_menu()
     correr = True
-    
-    # Temporizador para la bala vertical
-    tiempo_inicio_juego = pygame.time.get_ticks()
-    retraso_bala_vertical = 5000  # 5 segundos de retraso
 
     while correr:
-        tiempo_actual = pygame.time.get_ticks()
-        accion = 0  # Acción por defecto: nada
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 correr = False
             if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_SPACE and en_suelo and not pausa:  # Detectar la tecla espacio para saltar
+                if evento.key == pygame.K_SPACE and en_suelo and not pausa:
                     salto = True
                     en_suelo = False
-                    accion = 1  # Acción: salto
-                if evento.key == pygame.K_LEFT and not pausa :  # Mover izquierda
-                    if jugador.x > pos_x_min:
-                        jugador.x -= velocidad_x
-                        accion = 2  # Acción: izquierda
-                        retrocediendo = True
-                        tiempo_movimiento = tiempo_actual
-                if evento.key == pygame.K_RIGHT and not pausa :  # Mover derecha
-                    if jugador.x < pos_x_max:
-                        jugador.x += velocidad_x
-                        accion = 3  # Acción: derecha
-                        retrocediendo = True
-                        tiempo_movimiento = tiempo_actual
-                if evento.key == pygame.K_p:  # Presiona 'p' para pausar el juego
+                if evento.key == pygame.K_p:
                     pausa_juego()
-                if evento.key == pygame.K_q:  # Presiona 'q' para terminar el juego
-                    print("Juego terminado. Datos recopilados:", datos_modelo)
+                if evento.key == pygame.K_q:
+                    imprimir_datos()
                     pygame.quit()
                     exit()
 
         if not pausa:
-            # Modo manual: el jugador controla el salto
+            # Modo manual
             if not modo_auto:
+                mover_jugador()
                 if salto:
                     manejar_salto()
-                # Guardar los datos si estamos en modo manual
-                guardar_datos(accion)
+                guardar_datos()
 
-            # Actualizar el juego
-            if not bala_disparada:
+            # Modo automático con red neuronal
+            if modo_auto:         
+                # --- DECIDIR SI SALTAR ---
+                if contador_decidir_salto >= intervalo_decidir_salto:
+                    salto, en_suelo = decidir_salto(jugador, bala_suelo, velocidad_bala_suelo, bala_aire, bala_disparada_aire, modelo_entrenado, salto, en_suelo)
+                    contador_decidir_salto = 0
+                else:
+                    contador_decidir_salto += 1
+
+                # --- APLICAR EL SALTO SI SE DECIDIÓ SALTAR ---
+                if salto:
+                    manejar_salto()
+
+                # --- DECIDIR MOVIMIENTO LATERAL ---
+                jugador.x, pos_actual = decidir_movimiento(jugador, bala_aire, modelo_entrenado_movimiento, salto, bala_suelo)
+
+            # Disparar balas
+            if not bala_disparada_suelo:
                 disparar_bala()
                 
-            # Añadir retraso a la bala vertical
-            permitir_bala_vertical = tiempo_actual - tiempo_inicio_juego > retraso_bala_vertical
-            update(permitir_bala_vertical)
+            disparar_bala_aire()  # Intentar disparar bala aérea en cada frame (la función controla el intervalo)
+            
+            update()
 
-        # Actualizar la pantalla
         pygame.display.flip()
-        reloj.tick(30)  # Limitar el juego a 30 FPS
+        reloj.tick(30)
 
     pygame.quit()
-
-    # Detener la música al salir del juego
-    pygame.mixer.music.stop()
 
 if __name__ == "__main__":
     main()
