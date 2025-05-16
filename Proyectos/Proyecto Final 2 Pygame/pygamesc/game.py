@@ -399,13 +399,13 @@ def main():
                     salto = True
                     en_suelo = False
                     accion = 1  # Acción: salto
-                if evento.key == pygame.K_LEFT and not pausa and not retrocediendo:  # Mover izquierda
+                if evento.key == pygame.K_LEFT and not pausa :  # Mover izquierda
                     if jugador.x > pos_x_min:
                         jugador.x -= velocidad_x
                         accion = 2  # Acción: izquierda
                         retrocediendo = True
                         tiempo_movimiento = tiempo_actual
-                if evento.key == pygame.K_RIGHT and not pausa and not retrocediendo:  # Mover derecha
+                if evento.key == pygame.K_RIGHT and not pausa :  # Mover derecha
                     if jugador.x < pos_x_max:
                         jugador.x += velocidad_x
                         accion = 3  # Acción: derecha
@@ -417,16 +417,6 @@ def main():
                     print("Juego terminado. Datos recopilados:", datos_modelo)
                     pygame.quit()
                     exit()
-
-        # Lógica para regresar al origen después de 1 segundo
-        if retrocediendo and tiempo_actual - tiempo_movimiento >= TIEMPO_RETORNO:
-            if salto:
-                distancia_suelo = h - 100 - jugador.y
-                jugador.x = posicion_origen[0]
-                jugador.y = h - 100 - distancia_suelo
-            else:
-                jugador.x, jugador.y = posicion_origen
-            retrocediendo = False
 
         if not pausa:
             # Modo manual: el jugador controla el salto
