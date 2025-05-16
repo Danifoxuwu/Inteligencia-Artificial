@@ -263,24 +263,26 @@ def update(permitir_bala_vertical=True):
 
 # Función para guardar datos del modelo en modo manual (solo en memoria)
 def guardar_datos(accion):
-    global jugador, bala, bala_vertical, velocidad_bala, salto
-    distancia_horizontal = abs(jugador.x - bala.x)
-    distancia_vertical = abs(jugador.y - bala_vertical.y)
-    if bala_vertical.y > jugador.y:  # Si la bala está por debajo del jugador
-        distancia_vertical = 0  # Distancia vertical es 0 si ya pasó al jugador
+    global jugador, bala, bala_vertical, velocidad_bala
+    # Solo guardar acciones izquierda (2), derecha (3), nada (0)
+    if accion == 1:
+        return  # No guardar saltos
 
-    # Guardar velocidad de la bala, distancias, posiciones del jugador y acción tomada
+    distancia_x = abs(jugador.x - bala.x)
+    distancia_y = abs(jugador.y - bala_vertical.y)
+    jugador_x = jugador.x
+    bala_vertical_center = bala_vertical.center
+
     datos_modelo.append({
         "velocidad_bala": velocidad_bala,
-        "distancia_horizontal": distancia_horizontal,
-        "distancia_vertical": distancia_vertical,
-        "jugador_pos": (jugador.x, jugador.y),
-        "accion": accion
+        "distancia_x": distancia_x,
+        "distancia_y": distancia_y,
+        "jugador_x": jugador_x,
+        "bala_vertical_center": bala_vertical_center,
+        "ultima_accion": accion
     })
-    # Imprimir los datos guardados
-    print(f"Datos guardados: Velocidad Bala: {velocidad_bala}, "
-          f"Distancia Horizontal: {distancia_horizontal}, Distancia Vertical: {distancia_vertical}, "
-          f"Posición Jugador: {jugador.x, jugador.y}, Acción: {accion}")
+
+    print(f"Datos guardados: velocidad_bala={velocidad_bala}, distancia_x={distancia_x}, distancia_y={distancia_y}, jugador_x={jugador_x}, bala_vertical_center={bala_vertical_center}, ultima_accion={accion}")
 
 # Función para pausar el juego y guardar los datos
 def pausa_juego():
