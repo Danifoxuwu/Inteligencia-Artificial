@@ -1,0 +1,103 @@
+MANUAL DE PRÁCTICA CLÍNICA PARA UN ABORTO SEGURO
+Organización Mundial de la Salud (OMS), 2014
+ISBN: 978-92-4-354871-5
+
+1. DEFINICIONES Y CONCEPTOS CLAVE
+Aborto médico: Uso de fármacos (mifepristona + misoprostol o misoprostol solo) para interrumpir el embarazo.
+
+Aborto quirúrgico: Procedimientos transcervicales (aspiración por vacío, dilatación y evacuación).
+
+Edad gestacional: Calculada desde el primer día de la última menstruación (FUM). Primer trimestre: ≤12 semanas; segundo trimestre: 13–24 semanas.
+
+2. PRINCIPIOS ÉTICOS Y LEGALES
+Derechos humanos: Autonomía, no discriminación, confidencialidad.
+
+Recomendaciones:
+
+Brindar información científica y libre de juicios.
+
+Respetar la decisión de la mujer sin coerción.
+
+Garantizar acceso a anticoncepción post-aborto.
+
+3. MÉTODOS DE ABORTO SEGURO
+A. Aborto médico
+≤12 semanas:
+
+Mifepristona (200 mg oral) + Misoprostol (800 µg vaginal/sublingual).
+
+Solo misoprostol (400 µg oral o 800 µg vaginal cada 3–12 horas hasta 3 dosis).
+
+>12 semanas:
+
+Misoprostol (400 µg vaginal/sublingual cada 3 horas hasta 5 dosis).
+
+B. Aborto quirúrgico
+≤12–14 semanas: Aspiración por vacío manual (AVM) o eléctrica (AVE).
+
+>12–14 semanas: Dilatación y evacuación (D&E) con preparación cervical previa (misoprostol o dilatadores osmóticos).
+
+4. PROTOCOLOS CLÍNICOS
+Pre-aborto
+Evaluación:
+
+Historia médica, examen físico, ecografía (si es necesaria).
+
+Pruebas opcionales: hemoglobina, Rh, VIH/ITS.
+
+Consejería:
+
+Explicar métodos, riesgos, y opciones anticonceptivas.
+
+Durante el aborto
+Manejo del dolor:
+
+AINEs (ibuprofeno), bloqueo paracervical (lidocaína), sedación consciente (en casos seleccionados).
+
+Prevención de infecciones:
+
+Técnica "sin tocar", esterilización de equipos, profilaxis antibiótica (doxiciclina/azitromicina).
+
+Post-aborto
+Cuidados inmediatos:
+
+Monitoreo de sangrado, dolor o fiebre.
+
+Anticoncepción inmediata (DIU, hormonales, preservativos).
+
+Seguimiento:
+
+Solo obligatorio para abortos con misoprostol solo. Opcional para otros casos.
+
+5. COMPLICACIONES Y MANEJO
+Complicación	Manejo
+Hemorragia	Uterotónicos (oxitocina), reaspiración, transfusión si Hb <7 g/dL.
+Infección	Antibióticos (metronidazol + doxiciclina), reaspiración si hay retención.
+Perforación uterina	Laparoscopia/laparotomía si hay daño vascular o visceral.
+Aborto incompleto	Reaspiración o misoprostol (600 µg oral/400 µg sublingual).
+6. ANTICONCEPCIÓN POST-ABORTO
+Inicio inmediato:
+
+DIU: Inserción post-aspiración (excepto en aborto séptico).
+
+Hormonales: Píldoras, implantes, inyectables.
+
+Esterilización: Solo si el aborto no tuvo complicaciones.
+
+Métodos no recomendados:
+
+Ritmo o lactancia (hasta regularización menstrual).
+
+7. CONTEXTO LEGAL Y RECOMENDACIONES
+La OMS enfatiza que la penalización del aborto no reduce su incidencia, pero aumenta los abortos inseguros.
+
+Países con aborto legal (ej. Uruguay) muestran reducción del 30% en mortalidad materna.
+
+8. EQUIPOS Y SUMINISTROS NECESARIOS
+Aborto médico: Mifepristona, misoprostol, analgésicos, guantes.
+
+Aborto quirúrgico:
+
+Cánulas (4–16 mm), aspiradores manuales/eléctricos, dilatadores, espéculos.
+
+Uterotónicos (oxitocina), antibióticos, equipo de emergencia (oxígeno, ambú).
