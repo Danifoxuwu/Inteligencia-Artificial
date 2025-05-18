@@ -41,7 +41,7 @@ En conclusión para esta práctica podemos decir que el procesamiento de lenguaj
 
 - Aqui esta el video final del curso en donde explico como se hizo la practica y los resultados que se obtuvieron de esta 
   
-  [Video de Youtuve Daniel Avila ](https://www.youtube.com/watch?v=33uz4gxql6g)
+  [Video de Youtube Daniel Avila ](https://www.youtube.com/watch?v=33uz4gxql6g)
 
 ## Referencias
 Aqui se muestran algunas de las referencias en las que se consulto informacion sobre lo temas a responder, de los cuales la mayoria fueron usados para el dataset, en este caso toda la informacion recopilada se obtuvo de las siguientes fuentes:
