@@ -1,0 +1,110 @@
+# Práctica 3: Modelos de Lenguaje Natural
+
+## Introducción
+ - El procesamiento de lenguaje natural (PLN) permite a las computadoras comprender y generar texto humano. en este caso los modelos de lenguaje utilizan técnicas como embeddings para representar palabras y frases en vectores numéricos, facilitando búsquedas semánticas más precisas, además, el fine tuning adapta estos modelos a tareas específicas, mejorando su desempeño en aplicaciones como clasificación, resumen y recuperación de información., en este caso la practica se centra en el uso de un modelo para generar y responder preguntas.
+## Desarrollo
+- La práctica comenzó con la búsqueda de información, primero tuve que recopilar la información de ambos bandos, tanto información que estuviera de acuerdo con el contexto del tema como información que estuviera en contra, esto para obtener datasets que tuvieran contextos más completos y tuvieran un balase en la informacion que íbamos a manejar, en este caso los dividí en dos partes, aquellos que hablaban sobre el aborto y otros que hablaban sobre la eutanasia.
+
+![alt text](image.png)
+
+Despues de la busqueda de informacion lo que hice fue descargar el modelo, seleccione llama 3.2 para comenzar a trabajar con el.
+
+![alt text](image-1.png)
+
+Como siguiente paso en este caso descarge Any LLM con el cual tuve que configurar el entorno para trabajar con Ollama, y utilizar el modelo de llama 3.2, despues de esto le pase toda la informacion al modelo para que se entrenara y apartir de alli comenzar a hacer las preguntas.
+
+![alt text](image-2.png)
+
+Despues de pasar los archivos comenzamos con las preguntas, al principio como se ve en la imagen anterior solamente use un archivo para hacer una pregunta de prueba la cual tenia mas carga hacia el ambito pro vida, como podemos ver en la siguiente imagen.
+
+
+![alt text](image-3.png)
+
+Despues de esto se cargaron el resto de los datos para poder trabajar con mas informacion respetando el hecho de tener que recibir informacion mas neutral en sus respuestas.
+
+![alt text](image-4.png)
+
+Al conseguir la informacion completa, podemos ver que las respuestas son mas claras y completas manteniendo un enfoque mas centrado y menos orientado hacia un o otro lado.
+
+![alt text](image-5.png)
+
+Despues de finalizada esta practica opte por probar otra forma, la cual consumia demaciado mas recursos que el hacer uso de la herramienta LLM, , la compilacion tardo al rededor de 3 horas, aqui muestro una de las capturas que el modelo prototipo que due entrenado con datasets y fue hecho en codigo, como se ve en la pantala la respuesta no se acerca a nada, lo cual hasta cierto punto es chistoso ya que pareciera que el modelo esta roleando con el mismo solo porque en uno de los datasets habia una conversacion.
+
+![alt text](<WhatsApp Image 2025-05-17 at 1.50.10 PM.jpeg>)
+
+Con esto demostre como apartir de los modelos y los datasets se puede extraer y manejar informacion.
+
+## Conclusión
+En conclusión para esta práctica podemos decir que el procesamiento de lenguaje natural ha avanzado significativamente gracias a modelos como Ollama, especialmente Llama 3.2 (que fueron usados en la práctica), que se entrenan utilizando herramientas como Anything LLM y conjuntos de datos específicos para responder preguntas, las respuestas en este caso se basaban en lo que nosotros entrenamos, por lo que si queríamos recibir una respuesta especifica más acercada hacia una ideología u otra, necesitábamos entrenar el modelo con datos que fueran parecidos a lo que queríamos como respuesta, por ello logre ver el cómo los modelos analizan grandes volúmenes de texto mediante embeddings, los cuales convierten palabras y frases en vectores numéricos, permitiendo una comprensión semántica más profunda, usando de la mano él fine tuning el cual adapta el modelo a tareas concretas, mejorando su precisión y relevancia en aplicaciones específicas, esto hace que la combinación de datos sea de calidad, lo que permite que los modelos de lenguaje sean cada vez más efectivos en la generación y comprensión de texto humano.
+
+## Video Final
+
+- Aqui esta el video final del curso en donde explico como se hizo la practica y los resultados que se obtuvieron de esta 
+  
+  [text](https://www.youtube.com/watch?v=33uz4gxql6g)
+
+## Referencias
+Aqui se muestran algunas de las referencias en las que se consulto informacion sobre lo temas a responder, de los cuales la mayoria fueron usados para el dataset, en este caso toda la informacion recopilada se obtuvo de las siguientes fuentes:
+
+- Ministerio de Salud. Dirección de Estadísticas e Información de Salud. Estadísticas Vitales, Información básica 2009. Buenos Aires, 2009.
+
+- Como ha reconocido la Corte Interamericana de Derechos Humanos en "Artavia Murillo y otros (Fertilización in vitro) Vs. Costa Rica", sentencia del 28 de noviembre de 2012.
+
+- Asociación por los Derechos Civiles ADC: "Documento de la ADC elaborado con ocasión del día por la despenalización del aborto en América Latina y el Caribe", url: http://www.despenalizacion.org.ar/pdf/publicaciones/adc-23-8-2013.pdf.
+
+- E. Pantelides & Silvina Ramos & M. Romero & S. Fernández & M. Gaudio & C. Gianni & He. Manzelli, "Morbilidad materna severa en la Argentina: Trayectorias de las mujeres internadas por complicaciones de aborto y calidad de la atención recibida" (CENEP; CEDES, 2006).
+
+- Academia Nacional de Medicina de Buenos Aires, declaración 30/09/2010: url https://www.acamedbai.org.ar/declaraciones/02.php.
+
+- Comisión Nacional de Residentes de Medicina General, Argentina. Video "Los médicos generalistas garantizamos derechos". Enlace: https://www.facebook.com/residenciasde.medicinageneral/videos/1392595557476496/.
+
+- Faur, E. (Coord.), Gogna, M., Binstock, G.: "La educación sexual integral en la Argentina. Balances y desafíos de la implementación de la ley (2008-2015)", Ministerio de Educación Argentina, 2015. Enlace: http://www.ossyr.org.ar/pdf/bibliografia/547.pdf.
+
+- Ministerio de Justicia y Derechos Humanos, Argentina. Programa Nacional de Educación Sexual Integral Ley 26.150 enlace: http://servicios.infoleg.gob.ar/infolegInternet/anexos/120000-124999/121222/norma.htm
+
+- IntraMed: noticias médicas, agosto 2010. Enlace: http://www.intramed.net/contenidover.asp?contenidoID=67009
+
+- Faur, E. (Coord.), Gogna, M., Binstock, G.: Op. Cit.
+
+- UNICEF Argentina: "UNICEF presentó un informe sobre embarazo adolescente", 21/06/2017. Enlace: https://www.unicef.org/argentina/spanish/media_36439.html.
+
+- "María Eugenia Vidal opinó sobre el aborto y la despenalización de la droga" (Elecciones 2015), Diario El Analista, url: http://www.diarioelanalista.com.ar/1/nota_1.php?noticia_id=5927.
+
+- "Mauricio Macri se expresó en contra del aborto", Infobae 20/06/16, url: https://www.infobae.com/sociedad/2016/06/20/mauricio-macri-se-expreso-en-contra-del-aborto/
+
+- Sebastiani, M. ¿Porqué tenemos hijos? (1ª edición) Buenos Aires, Paidós, 2012.
+
+- Overall, C. Why we have children? The Ethical debate. Cambridge, MIT Press, 2012.
+
+- Thompson, J. J.: "A defense of the abortion", Philosophy & Public Affairs, Vol. 1, no. 1 (Fall 1971).
+
+- OMS: ¿Por qué siguen muriendo tantas mujeres durante el embarazo y el parto?, nov. 2015. Enlace: http://www.who.int/features/qa/12/es/.
+
+- Asociación Federal Derecho a Morir Dignamente. Dosier eutanasia y suicidio asistido. (Consultado el 15/11/2017.) Disponible en: http://www.eutanasia.ws/eutanasiasuicido.html
+» http://www.eutanasia.ws/eutanasiasuicido.html
+
+- Andrés R. Semper dolens. Historia del suicidio en Occidente. Barcelona: Acantilado; 2015.
+
+- Marín F. Testimonios: Inmaculada Echevarría. Blog Morir en casa. (Consultado el 14/1/2018). Disponible en: http://morirencasa.weebly.com/inmaculada-echevarria.html
+» http://morirencasa.weebly.com/inmaculada-echevarria.html
+
+- Mosterin J. La buena muerte. Madrid: El País. 12/4/2005. (Consultado el 15/11/2017.) Disponible en: https://elpais.com/diario/2005/04/12/opinion/1113256807850215.html
+» https://elpais.com/diario/2005/04/12/opinion/1113256807850215.html
+
+- Comisión Federal de Control y Evaluación de la Eutanasia de Bélgica. Informe 2014-2015. (Consultado el 15/11/2017). Disponible en: http://organesdeconcertation.sante.belgique.be/fr/organed%27avis-et-de-concertation/commission-federale-de-controle-et-devaluation-de-leuthanasie
+» http://organesdeconcertation.sante.belgique.be/fr/organed%27avis-et-de-concertation/commission-federale-de-controle-et-devaluation-de-leuthanasie
+
+- Comités Regionales de Revisión de la Eutanasia. Países Bajos. Informe anual 2016. (Consultado el 15/11/2017.) Disponible en: https://english.euthanasiecommissie.nl/the-committees/annual-reports
+» https://english.euthanasiecommissie.nl/the-committees/annual-reports
+
+- Dying with Dignity Canadá. Informe sobre la ley C-14: un año después, 2017. (Traducido por la AFDMD). (Consultado el 15/1/2018.) Disponible en: https://derechoamorir.org/wp-content/uploads/2018/10/2017-balance-ley-c14-castellano.pdf
+» https://derechoamorir.org/wp-content/uploads/2018/10/2017-balance-ley-c14-castellano.pdf
+
+- Simón Lorda P, Barrio Cantalejo IM, Alarcos Martínez FJ, et al. Ética y muerte digna: propuesta de consenso sobre un uso correcto de las palabras. Rev Calidad Asistencial. 2008;23:271-85 (Consultado el 15/11/2017.) Disponible en: http://www.eutanasia.ws/hemeroteca/z12.pdf
+» http://www.eutanasia.ws/hemeroteca/z12.pdf
+
+- Marín F. Eutanasia y paliativos van de la mano. Blog Morir en casa. (Consultado el 14/1/2018.) Disponible en: http://morirencasa.weebly.com/blog/los-cuidados-paliativos-y-la-eutanasia-van-de-la-mano
+» http://morirencasa.weebly.com/blog/los-cuidados-paliativos-y-la-eutanasia-van-de-la-mano
+
+- The Peace Ful Pill Handbook. (Consultado el 15/11/2017.) Disponible en: https://www.peacefulpillhandbook.com
+» https://www.peacefulpillhandbook.com
