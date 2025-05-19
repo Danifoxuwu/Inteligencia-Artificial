@@ -252,7 +252,7 @@ fondo_x1_kirby = 0
 fondo_x2_kirby = w
 ultimo_disparo_aire = 0
 
-# Controla el movimiento en zigzag del enemigo volador y su cooldown de disparo
+# Controla el disparo vertical
 def mover_enemigo_volador():
     global enemigo_volador, direccion_enemigo, cooldown_disparo
     enemigo_volador.x += direccion_enemigo * velocidad_enemigo
@@ -260,7 +260,7 @@ def mover_enemigo_volador():
     if enemigo_volador.x <= 0 or enemigo_volador.x >= 200 - enemigo_volador.width:
         direccion_enemigo *= -1
 
-# Dispara un proyectil aéreo desde la posición del enemigo volador
+# Dispara un proyectil aéreo desde una posición aleatoria
 def disparar_proyectil_aire():
     global proyectil_aire, proyectil_aire_disparado, velocidad_proyectil_aire, ultimo_disparo_aire, cooldown_disparo
     if not proyectil_aire_disparado and cooldown_disparo <= 0 and 0 <= enemigo_volador.x <= w:
