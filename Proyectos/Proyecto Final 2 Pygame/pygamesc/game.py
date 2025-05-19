@@ -425,19 +425,21 @@ def dibujar_boton_kirby(rect, texto, color, color_texto=NEGRO):
 
 # Menú principal con botones para modo manual, automático, entrenamiento y salir
 def mostrar_menu_kirby():
-    global menu_activo_kirby, modo_auto_kirby, modo_arbol_kirby, datos_kirby, modelo_kirby_entrenado, modelo_movimiento_kirby_entrenado, arbol_salto_kirby_entrenado, arbol_movimiento_kirby_entrenado
+    global menu_activo_kirby, modo_auto_kirby, modo_arbol_kirby, datos_kirby, modelo_kirby_entrenado, modelo_movimiento_kirby_entrenado, arbol_salto_kirby_entrenado, arbol_movimiento_kirby_entrenado, datos_movimiento_kirby
     pantalla_kirby.fill(NEGRO)
-    btn_manual_kirby = pygame.Rect(w // 2 - 120, h // 2 - 90, 240, 40)
-    btn_auto_kirby = pygame.Rect(w // 2 - 120, h // 2 - 40, 240, 40)
-    btn_arbol_kirby = pygame.Rect(w // 2 - 120, h // 2 + 10, 240, 40)
-    btn_entrenar_kirby = pygame.Rect(w // 2 - 120, h // 2 + 60, 240, 40)
-    btn_salir_kirby = pygame.Rect(w // 2 - 120, h // 2 + 110, 240, 40)
+    btn_manual_kirby = pygame.Rect(w // 2 - 120, h // 2 - 110, 240, 40)
+    btn_auto_kirby = pygame.Rect(w // 2 - 120, h // 2 - 60, 240, 40)
+    btn_arbol_kirby = pygame.Rect(w // 2 - 120, h // 2 - 10, 240, 40)
+    btn_entrenar_kirby = pygame.Rect(w // 2 - 120, h // 2 + 40, 240, 40)
+    btn_borrar_muestras = pygame.Rect(w // 2 - 120, h // 2 + 90, 240, 40)
+    btn_salir_kirby = pygame.Rect(w // 2 - 120, h // 2 + 140, 240, 40)
     while menu_activo_kirby:
         pantalla_kirby.fill(NEGRO)
         dibujar_boton_kirby(btn_manual_kirby, "Modo Manual Kirby", (200, 200, 255))
         dibujar_boton_kirby(btn_auto_kirby, "Modo Automático NN", (200, 255, 200))
         dibujar_boton_kirby(btn_arbol_kirby, "Modo Automático Árbol", (255, 220, 180))
         dibujar_boton_kirby(btn_entrenar_kirby, "Entrenar Modelos", (255, 255, 200))
+        dibujar_boton_kirby(btn_borrar_muestras, "Borrar Muestras", (255, 180, 180))
         dibujar_boton_kirby(btn_salir_kirby, "Salir", (255, 200, 200))
         pygame.display.flip()
         for evento in pygame.event.get():
@@ -462,6 +464,10 @@ def mostrar_menu_kirby():
                     modo_auto_kirby = False
                     modo_arbol_kirby = True
                     menu_activo_kirby = False
+                elif evento.key == pygame.K_b:
+                    datos_kirby.clear()
+                    datos_movimiento_kirby.clear()
+                    print("[INFO] Muestras borradas.")
                 elif evento.key == pygame.K_q:
                     imprimir_datos_kirby()
                     pygame.quit()
@@ -485,6 +491,10 @@ def mostrar_menu_kirby():
                     modelo_movimiento_kirby_entrenado = entrenar_movimiento_kirby(datos_movimiento_kirby)
                     arbol_salto_kirby_entrenado = entrenar_arbol_salto_kirby(datos_kirby)
                     arbol_movimiento_kirby_entrenado = entrenar_arbol_movimiento_kirby(datos_movimiento_kirby)
+                elif btn_borrar_muestras.collidepoint(mouse_pos):
+                    datos_kirby.clear()
+                    datos_movimiento_kirby.clear()
+                    print("[INFO] Muestras borradas.")
                 elif btn_salir_kirby.collidepoint(mouse_pos):
                     imprimir_datos_kirby()
                     pygame.quit()
