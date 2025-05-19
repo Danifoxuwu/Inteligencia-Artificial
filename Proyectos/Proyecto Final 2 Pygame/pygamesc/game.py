@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.utils import to_categorical
+from sklearn.tree import DecisionTreeClassifier
 
 # Esta función entrena una red neuronal para predecir cuándo saltar
 def entrenar_modelo_kirby(datos_kirby):
@@ -32,6 +33,19 @@ def entrenar_modelo_kirby(datos_kirby):
     print(f"[INFO] Modelo de Kirby entrenado con precisión: {accuracy:.4f} (loss: {loss:.4f}, muestras de test: {len(y_test)})")
     return modelo_kirby
 
+# Entrena un árbol de decisión para el salto de Kirby
+def entrenar_arbol_salto_kirby(datos_kirby):
+    if len(datos_kirby) < 10:
+        print(f"[INFO] Insuficientes datos para entrenar el árbol de salto de Kirby. Datos actuales: {len(datos_kirby)}")
+        return None
+    datos = np.array(datos_kirby)
+    X = datos[:, :6]
+    y = datos[:, 6]
+    arbol_salto = DecisionTreeClassifier(max_depth=6)
+    arbol_salto.fit(X, y)
+    print(f"[INFO] Árbol de salto de Kirby entrenado con {len(y)} muestras.")
+    return arbol_salto
+
 # Esta función decide si Kirby debe saltar según la predicción de la red
 def decidir_salto_kirby(kirby, proyectil_suelo, velocidad_proyectil, proyectil_aire, proyectil_aire_disparado, modelo_kirby, saltando, en_suelo):
     if modelo_kirby is None:
@@ -48,6 +62,24 @@ def decidir_salto_kirby(kirby, proyectil_suelo, velocidad_proyectil, proyectil_a
         saltando = True
         en_suelo = False
         print(f"[ACTION] Kirby salta (predicción={prediccion_kirby:.4f}, distancia_suelo={distancia_suelo}, distancia_aire_x={distancia_aire_x}, distancia_aire_y={distancia_aire_y})")
+    return saltando, en_suelo
+
+# Decide si Kirby debe saltar usando el árbol de decisión
+def decidir_salto_kirby_arbol(kirby, proyectil_suelo, velocidad_proyectil, proyectil_aire, proyectil_aire_disparado, arbol_salto, saltando, en_suelo):
+    if arbol_salto is None:
+        print("[WARN] Árbol de salto de Kirby no entrenado. No se puede decidir salto.")
+        return False, en_suelo
+    distancia_suelo = abs(kirby.x - proyectil_suelo.x)
+    distancia_aire_x = abs(kirby.centerx - proyectil_aire.centerx)
+    distancia_aire_y = abs(kirby.centery - proyectil_aire.centery)
+    hay_proyectil_aire = 1 if proyectil_aire_disparado else 0
+    entrada_kirby = np.array([[velocidad_proyectil, distancia_suelo, distancia_aire_x, distancia_aire_y, hay_proyectil_aire, kirby.x]])
+    prediccion = arbol_salto.predict(entrada_kirby)[0]
+    print(f"[INFO][ÁRBOL] Decisión de salto: predicción={prediccion}, en_suelo={en_suelo}, salto_actual={saltando}, entrada={entrada_kirby.tolist()}")
+    if prediccion == 1 and en_suelo:
+        saltando = True
+        en_suelo = False
+        print(f"[ACTION][ÁRBOL] Kirby salta (distancia_suelo={distancia_suelo}, distancia_aire_x={distancia_aire_x}, distancia_aire_y={distancia_aire_y})")
     return saltando, en_suelo
 
 # Esta función entrena una red neuronal para el movimiento lateral de Kirby
@@ -70,6 +102,19 @@ def entrenar_movimiento_kirby(datos_movimiento_kirby):
     loss, accuracy = modelo_movimiento_kirby.evaluate(X_test, y_test, verbose=0)
     print(f"[INFO] Precisión del modelo de movimiento de Kirby: {accuracy:.4f} (loss: {loss:.4f}, muestras de test: {len(y_test)})")
     return modelo_movimiento_kirby
+
+# Entrena un árbol de decisión para el movimiento lateral de Kirby
+def entrenar_arbol_movimiento_kirby(datos_movimiento_kirby):
+    if len(datos_movimiento_kirby) < 10:
+        print(f"[INFO] No hay suficientes datos para entrenar el árbol de movimiento de Kirby. Datos actuales: {len(datos_movimiento_kirby)}")
+        return None
+    datos = np.array(datos_movimiento_kirby)
+    X = datos[:, :8].astype('float32')
+    y = datos[:, 8].astype('int')
+    arbol_movimiento = DecisionTreeClassifier(max_depth=6)
+    arbol_movimiento.fit(X, y)
+    print(f"[INFO] Árbol de movimiento de Kirby entrenado con {len(y)} muestras.")
+    return arbol_movimiento
 
 # Esta función decide el movimiento lateral de Kirby (izquierda, quieto, derecha)
 def decidir_movimiento_kirby(kirby, proyectil_aire, modelo_movimiento_kirby, saltando, proyectil_suelo):
@@ -100,6 +145,25 @@ def decidir_movimiento_kirby(kirby, proyectil_aire, modelo_movimiento_kirby, sal
         print(f"[ACTION] Kirby se queda quieto (x={kirby.x})")
     return kirby.x, accion_kirby
 
+# Decide el movimiento lateral de Kirby usando el árbol de decisión
+def decidir_movimiento_kirby_arbol(kirby, proyectil_aire, arbol_movimiento, saltando, proyectil_suelo):
+    if arbol_movimiento is None:
+        print("[WARN] Árbol de movimiento de Kirby no entrenado.")
+        return kirby.x, 1
+    distancia_proyectil_suelo = abs(kirby.x - proyectil_suelo.x)
+    entrada_movimiento = np.array([[kirby.x, kirby.y, proyectil_aire.centerx, proyectil_aire.centery, proyectil_suelo.x, proyectil_suelo.y, distancia_proyectil_suelo, 1 if saltando else 0]], dtype='float32')
+    accion_kirby = arbol_movimiento.predict(entrada_movimiento)[0]
+    print(f"[INFO][ÁRBOL] Decisión movimiento: acción={accion_kirby}, entrada={entrada_movimiento.tolist()}")
+    if accion_kirby == 0 and kirby.x > 0:
+        kirby.x -= 5
+        print(f"[ACTION][ÁRBOL] Kirby se mueve a la izquierda (x={kirby.x})")
+    elif accion_kirby == 2 and kirby.x < 200 - kirby.width:
+        kirby.x += 5
+        print(f"[ACTION][ÁRBOL] Kirby se mueve a la derecha (x={kirby.x})")
+    else:
+        print(f"[ACTION][ÁRBOL] Kirby se queda quieto (x={kirby.x})")
+    return kirby.x, accion_kirby
+
 # Inicializa pygame y la ventana principal
 pygame.init()
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -125,10 +189,13 @@ pausa_kirby = False
 fuente_kirby = pygame.font.SysFont('Arial', 24)
 menu_activo_kirby = True
 modo_auto_kirby = False
+modo_arbol_kirby = False
 datos_kirby = []
 modelo_kirby_entrenado = None
+arbol_salto_kirby_entrenado = None
 datos_movimiento_kirby = []
 modelo_movimiento_kirby_entrenado = []
+arbol_movimiento_kirby_entrenado = None
 intervalo_decidir_salto_kirby = 1
 contador_salto_kirby = 0
 
@@ -358,17 +425,19 @@ def dibujar_boton_kirby(rect, texto, color, color_texto=NEGRO):
 
 # Menú principal con botones para modo manual, automático, entrenamiento y salir
 def mostrar_menu_kirby():
-    global menu_activo_kirby, modo_auto_kirby, datos_kirby, modelo_kirby_entrenado, modelo_movimiento_kirby_entrenado
+    global menu_activo_kirby, modo_auto_kirby, modo_arbol_kirby, datos_kirby, modelo_kirby_entrenado, modelo_movimiento_kirby_entrenado, arbol_salto_kirby_entrenado, arbol_movimiento_kirby_entrenado
     pantalla_kirby.fill(NEGRO)
-    btn_manual_kirby = pygame.Rect(w // 2 - 120, h // 2 - 70, 240, 40)
-    btn_auto_kirby = pygame.Rect(w // 2 - 120, h // 2 - 20, 240, 40)
-    btn_entrenar_kirby = pygame.Rect(w // 2 - 120, h // 2 + 30, 240, 40)
-    btn_salir_kirby = pygame.Rect(w // 2 - 120, h // 2 + 80, 240, 40)
+    btn_manual_kirby = pygame.Rect(w // 2 - 120, h // 2 - 90, 240, 40)
+    btn_auto_kirby = pygame.Rect(w // 2 - 120, h // 2 - 40, 240, 40)
+    btn_arbol_kirby = pygame.Rect(w // 2 - 120, h // 2 + 10, 240, 40)
+    btn_entrenar_kirby = pygame.Rect(w // 2 - 120, h // 2 + 60, 240, 40)
+    btn_salir_kirby = pygame.Rect(w // 2 - 120, h // 2 + 110, 240, 40)
     while menu_activo_kirby:
         pantalla_kirby.fill(NEGRO)
         dibujar_boton_kirby(btn_manual_kirby, "Modo Manual Kirby", (200, 200, 255))
-        dibujar_boton_kirby(btn_auto_kirby, "Modo Automático Kirby", (200, 255, 200))
-        dibujar_boton_kirby(btn_entrenar_kirby, "Entrenar Kirby", (255, 255, 200))
+        dibujar_boton_kirby(btn_auto_kirby, "Modo Automático NN", (200, 255, 200))
+        dibujar_boton_kirby(btn_arbol_kirby, "Modo Automático Árbol", (255, 220, 180))
+        dibujar_boton_kirby(btn_entrenar_kirby, "Entrenar Modelos", (255, 255, 200))
         dibujar_boton_kirby(btn_salir_kirby, "Salir", (255, 200, 200))
         pygame.display.flip()
         for evento in pygame.event.get():
@@ -378,13 +447,21 @@ def mostrar_menu_kirby():
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_a:
                     modo_auto_kirby = True
+                    modo_arbol_kirby = False
                     menu_activo_kirby = False
                 elif evento.key == pygame.K_m:
                     modo_auto_kirby = False
+                    modo_arbol_kirby = False
                     menu_activo_kirby = False
                 elif evento.key == pygame.K_t:
                     modelo_kirby_entrenado = entrenar_modelo_kirby(datos_kirby)
                     modelo_movimiento_kirby_entrenado = entrenar_movimiento_kirby(datos_movimiento_kirby)
+                    arbol_salto_kirby_entrenado = entrenar_arbol_salto_kirby(datos_kirby)
+                    arbol_movimiento_kirby_entrenado = entrenar_arbol_movimiento_kirby(datos_movimiento_kirby)
+                elif evento.key == pygame.K_r:
+                    modo_auto_kirby = False
+                    modo_arbol_kirby = True
+                    menu_activo_kirby = False
                 elif evento.key == pygame.K_q:
                     imprimir_datos_kirby()
                     pygame.quit()
@@ -393,13 +470,21 @@ def mostrar_menu_kirby():
                 mouse_pos = evento.pos
                 if btn_manual_kirby.collidepoint(mouse_pos):
                     modo_auto_kirby = False
+                    modo_arbol_kirby = False
                     menu_activo_kirby = False
                 elif btn_auto_kirby.collidepoint(mouse_pos):
                     modo_auto_kirby = True
+                    modo_arbol_kirby = False
+                    menu_activo_kirby = False
+                elif btn_arbol_kirby.collidepoint(mouse_pos):
+                    modo_auto_kirby = False
+                    modo_arbol_kirby = True
                     menu_activo_kirby = False
                 elif btn_entrenar_kirby.collidepoint(mouse_pos):
                     modelo_kirby_entrenado = entrenar_modelo_kirby(datos_kirby)
                     modelo_movimiento_kirby_entrenado = entrenar_movimiento_kirby(datos_movimiento_kirby)
+                    arbol_salto_kirby_entrenado = entrenar_arbol_salto_kirby(datos_kirby)
+                    arbol_movimiento_kirby_entrenado = entrenar_arbol_movimiento_kirby(datos_movimiento_kirby)
                 elif btn_salir_kirby.collidepoint(mouse_pos):
                     imprimir_datos_kirby()
                     pygame.quit()
@@ -428,7 +513,7 @@ def imprimir_datos_kirby():
 
 # Bucle principal del juego
 def main_kirby():
-    global saltando, en_suelo_kirby, proyectil_suelo_disparado, proyectil_aire_disparado, contador_salto_kirby
+    global saltando, en_suelo_kirby, proyectil_suelo_disparado, proyectil_aire_disparado, contador_salto_kirby, modo_arbol_kirby
     reloj_kirby = pygame.time.Clock()
     mostrar_menu_kirby()
     juego_activo = True
@@ -447,7 +532,7 @@ def main_kirby():
                     pygame.quit()
                     exit()
         if not pausa_kirby:
-            if not modo_auto_kirby:
+            if not modo_auto_kirby and not modo_arbol_kirby:
                 mover_kirby_manual()
                 if saltando:
                     manejar_salto_kirby()
@@ -461,6 +546,15 @@ def main_kirby():
                 if saltando:
                     manejar_salto_kirby()
                 kirby.x, pos_actual_kirby = decidir_movimiento_kirby(kirby, proyectil_aire, modelo_movimiento_kirby_entrenado, saltando, proyectil_suelo)
+            if modo_arbol_kirby:
+                if contador_salto_kirby >= intervalo_decidir_salto_kirby:
+                    saltando, en_suelo_kirby = decidir_salto_kirby_arbol(kirby, proyectil_suelo, velocidad_proyectil_suelo, proyectil_aire, proyectil_aire_disparado, arbol_salto_kirby_entrenado, saltando, en_suelo_kirby)
+                    contador_salto_kirby = 0
+                else:
+                    contador_salto_kirby += 1
+                if saltando:
+                    manejar_salto_kirby()
+                kirby.x, pos_actual_kirby = decidir_movimiento_kirby_arbol(kirby, proyectil_aire, arbol_movimiento_kirby_entrenado, saltando, proyectil_suelo)
             if not proyectil_suelo_disparado:
                 disparar_proyectil_suelo()
             disparar_proyectil_aire()
