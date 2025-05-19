@@ -14,7 +14,7 @@ from tensorflow.keras.utils import to_categorical
 # Esta función entrena una red neuronal para predecir cuándo saltar
 def entrenar_modelo_kirby(datos_kirby):
     if len(datos_kirby) < 10:
-        print("Insuficientes datos para entrenar el modelo de Kirby.")
+        print(f"[INFO] Insuficientes datos para entrenar el modelo de Kirby. Datos actuales: {len(datos_kirby)}")
         return None
     datos = np.array(datos_kirby)
     X = datos[:, :6]
@@ -29,13 +29,13 @@ def entrenar_modelo_kirby(datos_kirby):
     modelo_kirby.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     modelo_kirby.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
     loss, accuracy = modelo_kirby.evaluate(X_test, y_test, verbose=0)
-    print(f"Modelo de Kirby entrenado con precisión: {accuracy:.2f}")
+    print(f"[INFO] Modelo de Kirby entrenado con precisión: {accuracy:.4f} (loss: {loss:.4f}, muestras de test: {len(y_test)})")
     return modelo_kirby
 
 # Esta función decide si Kirby debe saltar según la predicción de la red
 def decidir_salto_kirby(kirby, proyectil_suelo, velocidad_proyectil, proyectil_aire, proyectil_aire_disparado, modelo_kirby, saltando, en_suelo):
     if modelo_kirby is None:
-        print("Modelo de Kirby no entrenado. No se puede decidir.")
+        print("[WARN] Modelo de Kirby no entrenado. No se puede decidir salto.")
         return False, en_suelo
     distancia_suelo = abs(kirby.x - proyectil_suelo.x)
     distancia_aire_x = abs(kirby.centerx - proyectil_aire.centerx)
@@ -43,16 +43,17 @@ def decidir_salto_kirby(kirby, proyectil_suelo, velocidad_proyectil, proyectil_a
     hay_proyectil_aire = 1 if proyectil_aire_disparado else 0
     entrada_kirby = np.array([[velocidad_proyectil, distancia_suelo, distancia_aire_x, distancia_aire_y, hay_proyectil_aire, kirby.x]])
     prediccion_kirby = modelo_kirby.predict(entrada_kirby, verbose=0)[0][0]
+    print(f"[INFO] Decisión de salto: predicción={prediccion_kirby:.4f}, en_suelo={en_suelo}, salto_actual={saltando}, entrada={entrada_kirby.tolist()}")
     if prediccion_kirby > 0.5 and en_suelo:
         saltando = True
         en_suelo = False
-        print("Kirby salta")
+        print(f"[ACTION] Kirby salta (predicción={prediccion_kirby:.4f}, distancia_suelo={distancia_suelo}, distancia_aire_x={distancia_aire_x}, distancia_aire_y={distancia_aire_y})")
     return saltando, en_suelo
 
 # Esta función entrena una red neuronal para el movimiento lateral de Kirby
 def entrenar_movimiento_kirby(datos_movimiento_kirby):
     if len(datos_movimiento_kirby) < 10:
-        print("No hay suficientes datos para entrenar el movimiento de Kirby.")
+        print(f"[INFO] No hay suficientes datos para entrenar el movimiento de Kirby. Datos actuales: {len(datos_movimiento_kirby)}")
         return None
     datos = np.array(datos_movimiento_kirby)
     X = datos[:, :8].astype('float32')
@@ -67,13 +68,13 @@ def entrenar_movimiento_kirby(datos_movimiento_kirby):
     modelo_movimiento_kirby.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     modelo_movimiento_kirby.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
     loss, accuracy = modelo_movimiento_kirby.evaluate(X_test, y_test, verbose=0)
-    print(f"Precisión del modelo de movimiento de Kirby: {accuracy:.2f}")
+    print(f"[INFO] Precisión del modelo de movimiento de Kirby: {accuracy:.4f} (loss: {loss:.4f}, muestras de test: {len(y_test)})")
     return modelo_movimiento_kirby
 
 # Esta función decide el movimiento lateral de Kirby (izquierda, quieto, derecha)
 def decidir_movimiento_kirby(kirby, proyectil_aire, modelo_movimiento_kirby, saltando, proyectil_suelo):
     if modelo_movimiento_kirby is None:
-        print("Modelo de movimiento de Kirby no entrenado.")
+        print("[WARN] Modelo de movimiento de Kirby no entrenado.")
         return kirby.x, 1
     distancia_proyectil_suelo = abs(kirby.x - proyectil_suelo.x)
     entrada_movimiento = np.array([[
@@ -88,14 +89,15 @@ def decidir_movimiento_kirby(kirby, proyectil_aire, modelo_movimiento_kirby, sal
     ]], dtype='float32')
     prediccion_movimiento = modelo_movimiento_kirby.predict(entrada_movimiento, verbose=0)[0]
     accion_kirby = np.argmax(prediccion_movimiento)
+    print(f"[INFO] Decisión movimiento: predicción={prediccion_movimiento}, acción={accion_kirby}, entrada={entrada_movimiento.tolist()}")
     if accion_kirby == 0 and kirby.x > 0:
         kirby.x -= 5
-        print("Kirby izquierda")
+        print(f"[ACTION] Kirby se mueve a la izquierda (x={kirby.x})")
     elif accion_kirby == 2 and kirby.x < 200 - kirby.width:
         kirby.x += 5
-        print("Kirby derecha")
+        print(f"[ACTION] Kirby se mueve a la derecha (x={kirby.x})")
     else:
-        print("Kirby quieto")
+        print(f"[ACTION] Kirby se queda quieto (x={kirby.x})")
     return kirby.x, accion_kirby
 
 # Inicializa pygame y la ventana principal
@@ -159,6 +161,7 @@ enemigo_frames = [
     pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'assets 2/enemigo5.png')), (80, 80)),
     pygame.transform.scale(pygame.image.load(os.path.join(base_path, 'assets 2/enemigo6.png')), (80, 80))
 ]
+
 fondo_kirby_img = pygame.image.load(os.path.join(base_path, 'assets 2/Radish Ruins 1.png'))
 fondo_kirby_img = pygame.transform.scale(fondo_kirby_img, (w, h))
 kirby = pygame.Rect(50, h - 100, 32, 48)
@@ -226,7 +229,7 @@ def mover_kirby_manual():
     distancia_x = (kirby.centerx - proyectil_aire.centerx)
     distancia_y = (kirby.centery - proyectil_aire.centery)
     distancia_total = (distancia_x**2 + distancia_y**2) ** 0.5
-    print(f"Posicion Kirby: {kirby.x} | Posicion proyectil {proyectil_aire.centerx} | Distancia horizontal(x): {distancia_x} | Distancia vertical(y): {distancia_y} | Velocidad Proyectil: {velocidad_proyectil_aire} ", end="\r")
+    print(f"[INFO] Kirby(x={kirby.x}, y={kirby.y}) | ProyectilAire(x={proyectil_aire.centerx}, y={proyectil_aire.centery}) | DistanciaX={distancia_x} | DistanciaY={distancia_y} | DistanciaTotal={distancia_total:.2f} | VelocidadProyectilAire={velocidad_proyectil_aire} | Saltando={saltando} | EnSuelo={en_suelo_kirby}", end="\r")
 
 # Guarda los datos de movimiento para entrenamiento y análisis
 def mover_kirby_automatico(modelo_movimiento_kirby):
@@ -291,7 +294,6 @@ def actualizar_juego_kirby():
             contador_frames = 0
         pantalla_kirby.blit(kirby_frames[frame_actual_kirby], (kirby.x, kirby.y))
     pantalla_kirby.blit(enemigo_frames[frame_actual_kirby % len(enemigo_frames)], (enemigo_kirby.x, enemigo_kirby.y))
-    pantalla_kirby.blit(enemigo_frames[frame_actual_kirby % len(enemigo_frames)], (enemigo_volador.x, enemigo_volador.y+75))
     if proyectil_suelo_disparado:
         proyectil_suelo.x += velocidad_proyectil_suelo
         pantalla_kirby.blit(proyectil_frames[frame_actual_kirby % len(proyectil_frames)], (proyectil_suelo.x, proyectil_suelo.y))
@@ -304,7 +306,7 @@ def actualizar_juego_kirby():
     if proyectil_aire.y > h or proyectil_aire.x < 0 or proyectil_aire.x > w:
         reset_proyectil_aire()
     if kirby.colliderect(proyectil_suelo) or kirby.colliderect(proyectil_aire):
-        print("Kirby golpeado!")
+        print(f"[GAME OVER] Kirby golpeado! Posición Kirby: (x={kirby.x}, y={kirby.y}), Proyectil suelo: (x={proyectil_suelo.x}, y={proyectil_suelo.y}), Proyectil aire: (x={proyectil_aire.x}, y={proyectil_aire.y})")
         reiniciar_juego_kirby()
 
 # Guarda los datos de cada frame para entrenamiento y análisis
@@ -420,8 +422,9 @@ def reiniciar_juego_kirby():
 
 # Imprime los datos de movimiento recolectados
 def imprimir_datos_kirby():
-    for dato in datos_movimiento_kirby:
-        print(dato)
+    print("[DATA] Datos de movimiento recolectados:")
+    for i, dato in enumerate(datos_movimiento_kirby):
+        print(f"  [{i}] {dato}")
 
 # Bucle principal del juego
 def main_kirby():
