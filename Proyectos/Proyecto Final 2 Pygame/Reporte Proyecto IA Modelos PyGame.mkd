@@ -1,0 +1,83 @@
+# Reporte Final: Implementación de Modelos de Inteligencia Artificial en PyGame para Esquivar Proyectiles
+
+## Introducción
+
+Este proyecto consiste en el desarrollo de un videojuego utilizando PyGame de la manera mas simple posible simulando lo que es un plataformero donde el personaje principal es Kirby, kirby debe esquivar proyectiles lanzados por enemigos, el objetivo principal es aplicar y comparar diferentes modelos de inteligencia artificial para automatizar el comportamiento de Kirby en diferentes situaciones, permitiendo que aprenda a esquivar los proyectiles de manera eficiente, para este proyecto se implementaron y evaluaron tres enfoques diferentes, en este caso se uso un modelo de una red neuronal, un árbol de decisión y un clasificador K-Nearest Neighbors.
+
+## Desarrollo
+
+### Descripción General del Juego
+
+El juego simula un entorno donde Kirby debe esquivar dos tipos de proyectiles, uno lanzado por el suelo y otro lanzado desde el aire, el usuario puede controlar a Kirby manualmente o activar los modos automáticos obviamente despues de entrenarlos, el entorno fue diseñado para recolectar datos de las acciones y estados de Kirby, los cuales son utilizados para entrenar los modelos de IA y asi poder ver como se comporta cada uno de ellos.
+
+### Recolección de Datos
+
+Durante el juego, se recolectan datos relevantes en cada frame, tales cokmo:
+
+- Posición de Kirby (x, y)
+- Posición de los proyectiles (suelo y aire)
+- Distancias relativas entre Kirby y los proyectiles
+- Estado de salto y movimiento lateral
+- Acción realizada (saltar, moverse a la izquierda, derecha o quedarse quieto)
+
+Estos datos se almacenan en listas y pueden ser utilizados para entrenar los modelos de IA.
+
+### Modelos de Inteligencia Artificial Implementados
+
+#### 1. Red Neuronal (Neural Network)
+
+Se implementó una red neuronal utilizando TensorFlow/Keras para dos tareas principales:
+
+- **Decisión de salto:** La red toma como entrada características como la velocidad y distancia de los proyectiles, y decide si Kirby debe saltar.
+- **Movimiento lateral:** Otra red neuronal predice si Kirby debe moverse a la izquierda, derecha o quedarse quieto, en función de la posición de los proyectiles y su propio estado.
+
+La arquitectura de la red incluye varias capas densas con funciones de activación ReLU y softmax/sigmoid según la tarea que necesiten realizar, en este caso las dos redes neuronales trabajan juntas para tomar una decision en conjunto.
+
+#### 2. Árbol de Decisión (Decision Tree)
+
+En el caso del arbol este se entrenó usando scikit-learn para ambas tareas (salto y movimiento lateral), el árbol aprende reglas simples basadas en los datos recolectados para tomar decisiones rápidas y explicables.
+
+#### 3. K-Nearest Neighbors (KNN)
+
+El modelo KNN también se entrenó para ambas tareas, este modelo predice la acción de Kirby basándose en las acciones tomadas en situaciones similares previamente observadas, esto para obtener como tal un resultado a partir de lo realizado.
+
+### Entrenamiento y Evaluación
+
+Cada modelo requiere una cantidad mínima de muestras para ser entrenado (al menos 10 para la red neuronal y el árbol, y al menos k para KNN), el entrenamiento se realiza desde el menú del juego, y los resultados de precisión se muestran en consola.
+
+Durante el juego, el usuario puede alternar entre los modos manual, automático (red neuronal), árbol de decisión y KNN, permitiendo comparar el desempeño de cada modelo en tiempo real.
+
+### Interfaz y Funcionalidades
+
+- **Menú principal:** Permite seleccionar el modo de juego y entrenar los modelos.
+- **Visualización:** El juego muestra a Kirby, los enemigos y los proyectiles con sprites animados.
+- **Pausa y recolección de datos:** El usuario puede pausar el juego y visualizar los datos recolectados para análisis posterior.
+- **Reinicio y borrado de muestras:** Se puede reiniciar el juego y borrar las muestras recolectadas desde el menú.
+
+## Explicación de los Modelos
+
+### Red Neuronal
+
+- **Ventajas:** Capaz de aprender patrones complejos y generalizar a situaciones nuevas.
+- **Desventajas:** Requiere más datos y tiempo de entrenamiento, menos interpretable.
+
+### Árbol de Decisión
+
+- **Ventajas:** Fácil de interpretar, rápido de entrenar y ejecutar.
+- **Desventajas:** Puede sobreajustarse con pocos datos, menos robusto ante ruido.
+
+### K-Nearest Neighbors
+
+- **Ventajas:** Simple de implementar, no requiere entrenamiento explícito.
+- **Desventajas:** Lento en predicción con muchos datos, sensible a la escala de las variables.
+
+## Conclusión
+
+En este caso este proyecto me ayudo a poder ver diferentes enfoques de IA en un entorno interactivo y visual, aqui observe que la red neuronal ofrece un mejor desempeño en situaciones complejas, mientras que el árbol de decisión y KNN pueden ser útiles en escenarios con reglas simples o pocos datos, la integración de estos modelos en PyGame demuestra la viabilidad de aplicar técnicas de aprendizaje automático en videojuegos y sistemas interactivos.
+
+## Referencias
+
+- [PyGame Documentation](https://www.pygame.org/docs/)
+- [TensorFlow Keras Documentation](https://www.tensorflow.org/api_docs/python/tf/keras)
+- [scikit-learn Documentation](https://scikit-learn.org/stable/documentation.html)
+
