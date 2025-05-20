@@ -114,7 +114,7 @@ def decidir_salto_kirby_knn(kirby, proyectil_suelo, velocidad_proyectil, proyect
         print(f"[ACTION][KNN] Kirby salta (distancia_suelo={distancia_suelo}, distancia_aire_x={distancia_aire_x}, distancia_aire_y={distancia_aire_y})")
     return saltando, en_suelo
 
-# Esta función entrena una red neuronal para el movimiento lateral de Kirby
+# Esta función entrena una red neuronal para el movimiento lateral de Kirby (binaria: 0=izquierda, 1=derecha)
 def entrenar_movimiento_kirby(datos_movimiento_kirby):
     if len(datos_movimiento_kirby) < 10:
         print(f"[INFO] No hay suficientes datos para entrenar el movimiento de Kirby. Datos actuales: {len(datos_movimiento_kirby)}")
@@ -122,17 +122,23 @@ def entrenar_movimiento_kirby(datos_movimiento_kirby):
     datos = np.array(datos_movimiento_kirby)
     X = datos[:, :8].astype('float32')
     y = datos[:, 8].astype('int')
-    y_categorical = to_categorical(y, num_classes=3)
-    X_train, X_test, y_train, y_test = train_test_split(X, y_categorical, test_size=0.2, random_state=42)
+    mask = (y == 0) | (y == 2)
+    X_bin = X[mask]
+    y_bin = y[mask]
+    y_bin = np.where(y_bin == 2, 1, 0)
+    if len(y_bin) < 10:
+        print(f"[INFO] No hay suficientes muestras de izquierda/derecha para entrenar la red binaria. Datos actuales: {len(y_bin)}")
+        return None
+    X_train, X_test, y_train, y_test = train_test_split(X_bin, y_bin, test_size=0.2, random_state=42)
     modelo_movimiento_kirby = Sequential([
-        Dense(64, input_dim=8, activation='relu'),
-        Dense(32, activation='relu'),
-        Dense(3, activation='softmax')
+        Dense(32, input_dim=8, activation='relu'),
+        Dense(16, activation='relu'),
+        Dense(1, activation='sigmoid')
     ])
-    modelo_movimiento_kirby.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    modelo_movimiento_kirby.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     modelo_movimiento_kirby.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
     loss, accuracy = modelo_movimiento_kirby.evaluate(X_test, y_test, verbose=0)
-    print(f"[INFO] Precisión del modelo de movimiento de Kirby: {accuracy:.4f} (loss: {loss:.4f}, muestras de test: {len(y_test)})")
+    print(f"[INFO] Precisión del modelo de movimiento binario de Kirby: {accuracy:.4f} (loss: {loss:.4f}, muestras de test: {len(y_test)})")
     return modelo_movimiento_kirby
 
 # Entrena un árbol de decisión para el movimiento lateral de Kirby
@@ -161,7 +167,7 @@ def entrenar_knn_movimiento_kirby(datos_movimiento_kirby, n_neighbors=3):
     print(f"[INFO] KNN de movimiento de Kirby entrenado con {len(y)} muestras.")
     return knn_movimiento
 
-# Esta función decide el movimiento lateral de Kirby (izquierda, quieto, derecha)
+# Esta función decide el movimiento lateral de Kirby (izquierda, quieto, derecha) usando la red binaria
 def decidir_movimiento_kirby(kirby, proyectil_aire, modelo_movimiento_kirby, saltando, proyectil_suelo):
     if modelo_movimiento_kirby is None:
         print("[WARN] Modelo de movimiento de Kirby no entrenado.")
@@ -177,17 +183,19 @@ def decidir_movimiento_kirby(kirby, proyectil_aire, modelo_movimiento_kirby, sal
         distancia_proyectil_suelo,
         1 if saltando else 0
     ]], dtype='float32')
-    prediccion_movimiento = modelo_movimiento_kirby.predict(entrada_movimiento, verbose=0)[0]
-    accion_kirby = np.argmax(prediccion_movimiento)
-    print(f"[INFO] Decisión movimiento: predicción={prediccion_movimiento}, acción={accion_kirby}, entrada={entrada_movimiento.tolist()}")
-    if accion_kirby == 0 and kirby.x > 0:
+    prediccion = modelo_movimiento_kirby.predict(entrada_movimiento, verbose=0)[0][0]
+    # 0=izquierda, 1=derecha, quedarse quieto si la predicción está cerca de 0.5
+    accion_kirby = 1  # por default quieto
+    if prediccion < 0.4 and kirby.x > 0:
         kirby.x -= 5
-        print(f"[ACTION] Kirby se mueve a la izquierda (x={kirby.x})")
-    elif accion_kirby == 2 and kirby.x < 200 - kirby.width:
+        accion_kirby = 0
+        print(f"[ACTION][NN] Kirby se mueve a la izquierda (x={kirby.x}) pred={prediccion:.3f}")
+    elif prediccion > 0.6 and kirby.x < 200 - kirby.width:
         kirby.x += 5
-        print(f"[ACTION] Kirby se mueve a la derecha (x={kirby.x})")
+        accion_kirby = 2
+        print(f"[ACTION][NN] Kirby se mueve a la derecha (x={kirby.x}) pred={prediccion:.3f}")
     else:
-        print(f"[ACTION] Kirby se queda quieto (x={kirby.x})")
+        print(f"[ACTION][NN] Kirby se queda quieto (x={kirby.x}) pred={prediccion:.3f}")
     return kirby.x, accion_kirby
 
 # Decide el movimiento lateral de Kirby usando el árbol de decisión

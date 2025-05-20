@@ -31,7 +31,7 @@ Se implementó una red neuronal utilizando TensorFlow/Keras para dos tareas prin
 - **Decisión de salto:** La red toma como entrada características como la velocidad y distancia de los proyectiles, y decide si Kirby debe saltar.
 - **Movimiento lateral:** Otra red neuronal predice si Kirby debe moverse a la izquierda, derecha o quedarse quieto, en función de la posición de los proyectiles y su propio estado.
 
-La arquitectura de la red incluye varias capas densas con funciones de activación ReLU y softmax/sigmoid según la tarea que necesiten realizar, en este caso las dos redes neuronales trabajan juntas para tomar una decision en conjunto.
+La arquitectura de la red incluye varias capas densas con funciones de activación ReLU y sigmoid según la tarea que necesiten realizar,en el caso del movimiento lateral, la red neuronal tiene una sola salida con activación sigmoide y la decisión se toma aplicando umbrales: valores bajos indican izquierda, valores altos indican derecha, y valores intermedios indican quedarse quieto.
 
 ```python
 def entrenar_modelo_kirby(datos_kirby):
@@ -53,16 +53,16 @@ def entrenar_modelo_kirby(datos_kirby):
 def entrenar_movimiento_kirby(datos_movimiento_kirby):
     # ...preparación de datos...
     modelo_movimiento_kirby = Sequential([
-        Dense(64, input_dim=8, activation='relu'),
-        Dense(32, activation='relu'),
-        Dense(3, activation='softmax')
+        Dense(32, input_dim=8, activation='relu'),
+        Dense(16, activation='relu'),
+        Dense(1, activation='sigmoid')
     ])
-    modelo_movimiento_kirby.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    modelo_movimiento_kirby.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     modelo_movimiento_kirby.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
     # ...evaluación...
     return modelo_movimiento_kirby
 ```
-*Aquí la salida es softmax para clasificar entre tres posibles acciones de movimiento lateral.*
+*Aquí la salida es una sola neurona con activación sigmoide. Se interpreta la predicción usando umbrales: si el valor es menor a 0.4 Kirby se mueve a la izquierda, si es mayor a 0.6 se mueve a la derecha, y si está entre esos valores se queda quieto.*
 
 #### 2. Árbol de Decisión (Decision Tree)
 
