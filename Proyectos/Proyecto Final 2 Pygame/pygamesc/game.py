@@ -265,6 +265,10 @@ arbol_movimiento_kirby_entrenado = None
 knn_movimiento_kirby_entrenado = None
 intervalo_decidir_salto_kirby = 1
 contador_salto_kirby = 0
+frame_actual_kirby = 0
+velocidad_animacion = 10
+contador_frames = 0
+velocidad_proyectil_suelo = -10
 
 # Carga los sprites de Kirby, proyectiles y enemigos
 kirby_frames = [
@@ -303,21 +307,17 @@ proyectil_suelo = pygame.Rect(w - 50, h - 90, 16, 16)
 proyectil_aire = pygame.Rect(0, -50, 16, 16)
 enemigo_kirby = pygame.Rect(w - 100, h - 130, 64, 64)
 bala_vertical = pygame.Rect(0, 0, 64, 64)
-direccion_enemigo = 1
-velocidad_enemigo = 5
-cooldown_disparo = 0
-intervalo_disparo = 60
 velocidad_proyectil_aire = [0, 5]
 menu_rect_kirby = pygame.Rect(w // 2 - 135, h // 2 - 90, 270, 180)
-frame_actual_kirby = 0
-velocidad_animacion = 10
-contador_frames = 0
-velocidad_proyectil_suelo = -10
 proyectil_suelo_disparado = False
 proyectil_aire_disparado = False
 fondo_x1_kirby = 0
 fondo_x2_kirby = w
 ultimo_disparo_aire = 0
+direccion_enemigo = 1
+velocidad_enemigo = 5
+cooldown_disparo = 0
+intervalo_disparo = 60
 
 # Controla el disparo vertical
 def mover_bala_vertical():

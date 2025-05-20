@@ -33,13 +33,60 @@ Se implementó una red neuronal utilizando TensorFlow/Keras para dos tareas prin
 
 La arquitectura de la red incluye varias capas densas con funciones de activación ReLU y softmax/sigmoid según la tarea que necesiten realizar, en este caso las dos redes neuronales trabajan juntas para tomar una decision en conjunto.
 
+```python
+def entrenar_modelo_kirby(datos_kirby):
+    # ...preparación de datos...
+    modelo_kirby = Sequential([
+        Dense(32, input_dim=6, activation='relu'),
+        Dense(32, activation='relu'),
+        Dense(16, activation='relu'),
+        Dense(1, activation='sigmoid')
+    ])
+    modelo_kirby.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    modelo_kirby.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
+    # ...evaluación...
+    return modelo_kirby
+```
+*Este fragmento muestra la arquitectura de la red neuronal para la decisión de salto, utiliza capas densas y la función de activación sigmoid para salida binaria (saltar/no saltar).*
+
+```python
+def entrenar_movimiento_kirby(datos_movimiento_kirby):
+    # ...preparación de datos...
+    modelo_movimiento_kirby = Sequential([
+        Dense(64, input_dim=8, activation='relu'),
+        Dense(32, activation='relu'),
+        Dense(3, activation='softmax')
+    ])
+    modelo_movimiento_kirby.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    modelo_movimiento_kirby.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
+    # ...evaluación...
+    return modelo_movimiento_kirby
+```
+*Aquí la salida es softmax para clasificar entre tres posibles acciones de movimiento lateral.*
+
 #### 2. Árbol de Decisión (Decision Tree)
 
 En el caso del arbol este se entrenó usando scikit-learn para ambas tareas (salto y movimiento lateral), el árbol aprende reglas simples basadas en los datos recolectados para tomar decisiones rápidas y explicables.
 
+```python
+def entrenar_arbol_salto_kirby(datos_kirby):
+    arbol_salto = DecisionTreeClassifier(max_depth=6)
+    arbol_salto.fit(X, y)
+    return arbol_salto
+```
+*Este código entrena un árbol de decisión para la tarea de salto. El parámetro `max_depth` controla la profundidad máxima del árbol para evitar sobreajuste.*
+
 #### 3. K-Nearest Neighbors (KNN)
 
 El modelo KNN también se entrenó para ambas tareas, este modelo predice la acción de Kirby basándose en las acciones tomadas en situaciones similares previamente observadas, esto para obtener como tal un resultado a partir de lo realizado.
+
+```python
+def entrenar_knn_salto_kirby(datos_kirby, n_neighbors=3):
+    knn_salto = KNeighborsClassifier(n_neighbors=n_neighbors)
+    knn_salto.fit(X, y)
+    return knn_salto
+```
+*Este fragmento muestra cómo se entrena un clasificador KNN para la decisión de salto. El parámetro `n_neighbors` indica cuántos vecinos considerar para la predicción.*
 
 ### Entrenamiento y Evaluación
 
@@ -53,6 +100,23 @@ Durante el juego, el usuario puede alternar entre los modos manual, automático 
 - **Visualización:** El juego muestra a Kirby, los enemigos y los proyectiles con sprites animados.
 - **Pausa y recolección de datos:** El usuario puede pausar el juego y visualizar los datos recolectados para análisis posterior.
 - **Reinicio y borrado de muestras:** Se puede reiniciar el juego y borrar las muestras recolectadas desde el menú.
+
+### Integración de los Modelos en el Juego
+
+Cada modelo puede ser seleccionado desde el menú del juego y se utiliza para tomar decisiones automáticas sobre el movimiento y el salto de Kirby. El usuario puede alternar entre los modos manual y automáticos para comparar el desempeño de cada modelo en tiempo real.
+
+```python
+if modo_auto_kirby:
+    saltando, en_suelo_kirby = decidir_salto_kirby(...)
+    kirby.x, pos_actual_kirby = decidir_movimiento_kirby(...)
+elif modo_arbol_kirby:
+    saltando, en_suelo_kirby = decidir_salto_kirby_arbol(...)
+    kirby.x, pos_actual_kirby = decidir_movimiento_kirby_arbol(...)
+elif modo_knn_kirby:
+    saltando, en_suelo_kirby = decidir_salto_kirby_knn(...)
+    kirby.x, pos_actual_kirby = decidir_movimiento_kirby_knn(...)
+```
+*Dependiendo del modo seleccionado, se utiliza el modelo correspondiente para controlar a Kirby.*
 
 ## Explicación de los Modelos
 
