@@ -302,7 +302,7 @@ kirby = pygame.Rect(50, h - 100, 32, 48)
 proyectil_suelo = pygame.Rect(w - 50, h - 90, 16, 16)
 proyectil_aire = pygame.Rect(0, -50, 16, 16)
 enemigo_kirby = pygame.Rect(w - 100, h - 130, 64, 64)
-enemigo_volador = pygame.Rect(0, 0, 64, 64)
+bala_vertical = pygame.Rect(0, 0, 64, 64)
 direccion_enemigo = 1
 velocidad_enemigo = 5
 cooldown_disparo = 0
@@ -320,19 +320,19 @@ fondo_x2_kirby = w
 ultimo_disparo_aire = 0
 
 # Controla el disparo vertical
-def mover_enemigo_volador():
-    global enemigo_volador, direccion_enemigo, cooldown_disparo
-    enemigo_volador.x += direccion_enemigo * velocidad_enemigo
+def mover_bala_vertical():
+    global bala_vertical, direccion_enemigo, cooldown_disparo
+    bala_vertical.x += direccion_enemigo * velocidad_enemigo
     cooldown_disparo -= 1
-    if enemigo_volador.x <= 0 or enemigo_volador.x >= 200 - enemigo_volador.width:
+    if bala_vertical.x <= 0 or bala_vertical.x >= 200 - bala_vertical.width:
         direccion_enemigo *= -1
 
 # Dispara un proyectil aéreo desde una posición aleatoria
-def disparar_proyectil_aire():
+def disparar_bala_vertical():
     global proyectil_aire, proyectil_aire_disparado, velocidad_proyectil_aire, ultimo_disparo_aire, cooldown_disparo
-    if not proyectil_aire_disparado and cooldown_disparo <= 0 and 0 <= enemigo_volador.x <= w:
-        proyectil_aire.x = enemigo_volador.x + enemigo_volador.width // 2 - proyectil_aire.width // 2
-        proyectil_aire.y = enemigo_volador.y + enemigo_volador.height
+    if not proyectil_aire_disparado and cooldown_disparo <= 0 and 0 <= bala_vertical.x <= w:
+        proyectil_aire.x = bala_vertical.x + bala_vertical.width // 2 - proyectil_aire.width // 2
+        proyectil_aire.y = bala_vertical.y + bala_vertical.height
         velocidad_proyectil_aire[0] = 0
         velocidad_proyectil_aire[1] = 5
         proyectil_aire_disparado = True
@@ -407,7 +407,7 @@ def manejar_salto_kirby():
 # Actualiza la pantalla, mueve los elementos y detecta colisiones
 def actualizar_juego_kirby():
     global proyectil_suelo, proyectil_aire, frame_actual_kirby, contador_frames, fondo_x1_kirby, fondo_x2_kirby
-    mover_enemigo_volador()
+    mover_bala_vertical()
     fondo_x1_kirby -= 3
     fondo_x2_kirby -= 3
     if fondo_x1_kirby <= -w:
@@ -665,7 +665,7 @@ def main_kirby():
                 kirby.x, pos_actual_kirby = decidir_movimiento_kirby_knn(kirby, proyectil_aire, knn_movimiento_kirby_entrenado, saltando, proyectil_suelo)
             if not proyectil_suelo_disparado:
                 disparar_proyectil_suelo()
-            disparar_proyectil_aire()
+            disparar_bala_vertical()
             actualizar_juego_kirby()
         pygame.display.flip()
         reloj_kirby.tick(30)
